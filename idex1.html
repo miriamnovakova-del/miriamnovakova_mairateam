@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <!-- ═══════════════════════════════════════════════
+       META & TITLE
+       Základní metadata stránky – charset zajišťuje
+       správné zobrazení češtiny, viewport nastavuje
+       responzivní chování na mobilech.
+  ═══════════════════════════════════════════════ -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Portfolio Analysis</title>
+
+
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       CSS CUSTOM PROPERTIES (PROMĚNNÉ)
+       Centrální místo pro barvy a stíny.
+       Změnou hodnot tady upravíš celý web.
+    ═══════════════════════════════════════════════ */
+    :root {
+      --clr-bg:        #073027;   /* tmavá zelená – hlavní pozadí */
+      --clr-surface:   #0c3d30;   /* o kousek světlejší – karty */
+      --clr-border:    #154d3e;   /* jemné okraje */
+      --clr-accent:    #ff4921;   /* oranžová/červená – primární akcent */
+      --clr-accent-lt: #ff6e4a;   /* světlejší – hover stavy */
+      --clr-text:      #e8e6df;   /* teplá bílá – hlavní text */
+      --clr-muted:     #7aad9a;   /* ztlumená zelená – sekundární text */
+      --clr-tag-bg:    #0a3829;   /* pozadí tagů */
+
+      --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.45);
+      --shadow-btn:  0 0 24px rgba(255, 73, 33, 0.3);
+
+      --font-display: Arial, sans-serif;
+      --font-body:    Arial, sans-serif;
+
+      --radius: 6px;
+      --transition: 0.25s ease;
+    }
+
+    /* ═══════════════════════════════════════════════
+       RESET & BASE
+       Odstraňujeme výchozí styly prohlížeče,
+       nastavujeme box-sizing a smooth scroll.
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--clr-bg);
+      color: var(--clr-text);
+      line-height: 1.65;
+      min-height: 100vh;
+      /* Jemná mřížka na pozadí jako dekorativní efekt */
+      background-image:
+        linear-gradient(rgba(255,73,33,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,73,33,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       NAVIGACE
+       Fixní lišta nahoře s logem a odkazem.
+       backdrop-filter: blur přidává efekt "frosted glass".
+    ═══════════════════════════════════════════════ */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 3rem;
+      background: rgba(11, 15, 26, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--clr-accent);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--clr-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color var(--transition);
+    }
+
+    .nav-links a:hover { color: var(--clr-accent); }
+
+    /* ═══════════════════════════════════════════════
+       HERO SEKCE
+       Hlavní vizuální sekce s nadpisem a popisem.
+       Zlatá čára nad nadpisem je dekorativní pseudo-element.
+    ═══════════════════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 3rem 3rem 5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+      /* Animace – obsah se při načtení plynule objeví */
+      animation: fadeUp 0.9s ease both;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--clr-accent);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Malá zlatá linka před eyebrow textem */
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1.5px;
+      background: var(--clr-accent);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 2.6rem); /* fluid typography */
+      font-weight: 300;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.6rem;
+    }
+
+    /* Zvýrazněné slovo zlatou kurzívou */
+    h1 em {
+      font-style: italic;
+      color: var(--clr-accent);
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--clr-muted);
+      max-width: 540px;
+      margin-bottom: 2.8rem;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    /* ═══════════════════════════════════════════════
+       TLAČÍTKA
+       Primární (zlaté) a sekundární (outline) styl.
+    ═══════════════════════════════════════════════ */
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: block;
+      margin: 0 auto;
+      max-width: fit-content;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: none;
+      text-decoration: none;
+    }
+
+    /* Primární zlaté tlačítko */
+    .btn-primary {
+      background: var(--clr-accent);
+      color: #0b0f1a;
+      box-shadow: var(--shadow-btn);
+    }
+
+    .btn-primary:hover {
+      background: var(--clr-accent-lt);
+      transform: translateY(-2px);
+      box-shadow: 0 0 36px rgba(201, 168, 76, 0.4);
+    }
+
+    /* Sekundární outline tlačítko */
+    .btn-outline {
+      background: transparent;
+      color: var(--clr-text);
+      border: 1px solid var(--clr-border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--clr-accent);
+      color: var(--clr-accent);
+      transform: translateY(-2px);
+    }
+
+    /* Šipka v tlačítku – animace při hoveru */
+    .btn .arrow {
+      transition: transform var(--transition);
+    }
+    .btn:hover .arrow { transform: translateX(4px); }
+
+    /* ═══════════════════════════════════════════════
+       STATS STRIP
+       Rychlý přehled metrik pod hero sekcí.
+    ═══════════════════════════════════════════════ */
+    .stats-strip {
+      background: var(--clr-surface);
+      border-top: 1px solid var(--clr-border);
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 2rem;
+    }
+
+    .stat-item {
+      text-align: center;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    /* Každá stat karta se zpožďuje (stagger efekt) */
+    .stat-item:nth-child(2) { animation-delay: 0.1s; }
+    .stat-item:nth-child(3) { animation-delay: 0.2s; }
+    .stat-item:nth-child(4) { animation-delay: 0.3s; }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 600;
+      color: var(--clr-accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--clr-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 0.35rem;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FEATURES SECTION
+       Tři karty s popisem klíčových funkcí toolu.
+    ═══════════════════════════════════════════════ */
+    .features {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 6rem 3rem;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--clr-accent);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 300;
+      margin-bottom: 3.5rem;
+      max-width: 500px;
+      line-height: 1.2;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px; /* úzká mezera = optická mřížka */
+      background: var(--clr-border);
+      border: 1px solid var(--clr-border);
+      border-radius: calc(var(--radius) + 1px);
+      overflow: hidden;
+    }
+
+    .card {
+      background: var(--clr-surface);
+      padding: 2.5rem;
+      transition: background var(--transition);
+      cursor: default;
+    }
+
+    .card:hover { background: #162035; }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.4rem;
+      font-size: 1.2rem;
+      transition: border-color var(--transition);
+    }
+
+    .card:hover .card-icon { border-color: var(--clr-accent); }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.7rem;
+      color: var(--clr-text);
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--clr-muted);
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════
+       UPLOAD / CTA SEKCE
+       Vstupní oblast pro soubor nebo rychlý start.
+    ═══════════════════════════════════════════════ */
+    .cta-section {
+      background: var(--clr-surface);
+      border-top: 1px solid var(--clr-border);
+    }
+
+    .cta-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 0.8rem;
+    }
+
+    .cta-text p {
+      color: var(--clr-muted);
+      font-size: 0.92rem;
+      max-width: 400px;
+    }
+
+    .upload-zone {
+      flex: 0 0 320px;
+      height: 200px;
+      border: 1.5px dashed var(--clr-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      transition: all var(--transition);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .sheets-zone {
+      padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--clr-accent);
+      background: rgba(201,168,76,0.04);
+    }
+
+    .upload-icon {
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+      display: block;
+      color: var(--clr-accent);
+    }
+
+    .upload-title {
+      font-size: 0.92rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .upload-hint {
+      font-size: 0.78rem;
+      color: var(--clr-muted);
+      margin-bottom: 1.4rem;
+    }
+
+    /* Tagy formátů souborů */
+    .file-tags {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .file-tag {
+      background: var(--clr-tag-bg);
+      border: 1px solid var(--clr-border);
+      color: var(--clr-muted);
+      font-size: 0.72rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Upload možnosti */
+    .upload-options {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .sheets-zone .input-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
+    .sheets-zone label {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--clr-text);
+      white-space: nowrap;
+    }
+
+    .sheets-zone input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      background: var(--clr-surface);
+      color: var(--clr-text);
+      font-size: 0.88rem;
+    }
+
+    .sheets-zone input:focus {
+      outline: none;
+      border-color: var(--clr-accent);
+    }
+
+    /* ═══════════════════════════════════════════════
+       FOOTER
+       Jednoduchá patička s copyright textem.
+    ═══════════════════════════════════════════════ */
+    footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-top: 1px solid var(--clr-border);
+    }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      color: var(--clr-muted);
+    }
+
+    .footer-badge {
+      font-size: 0.72rem;
+      color: var(--clr-muted);
+      border: 1px solid var(--clr-border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 3px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════════
+       KEYFRAME ANIMACE
+       fadeUp: obsah se při načtení posune nahoru
+       a přejde z průhledné na plnou barvu.
+    ═══════════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0);     }
+    }
+
+    /* ═══════════════════════════════════════════════
+       DEKORATIVNÍ PRVEK – pravý top gradient orb
+    ═══════════════════════════════════════════════ */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      right: -100px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255,73,33,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════════════
+       RESPONZIVITA
+       Na mobilech upravujeme padding a skryjeme
+       některé navigační prvky.
+    ═══════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 7rem 1.5rem 4rem; }
+      .stats-inner { padding: 1.5rem; gap: 1.5rem; }
+      .features { padding: 4rem 1.5rem; }
+      .cta-inner { padding: 3rem 1.5rem; flex-direction: column; }
+      .upload-zone { flex: 1 1 auto; width: 100%; }
+      footer { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       HERO SEKCE – hlavní nadpis a upload
+  ═══════════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Product <em>Portfolio</em> Analysis</h1>
+
+      <p class="hero-desc">
+        Gain a comprehensive view of your product ecosystem. Identify gaps,
+        evaluate performance, and make data-driven decisions to drive
+        sustainable growth.
+      </p>
+
+      <!-- Upload možnosti -->
+      <div class="upload-options">
+        <!-- Upload z počítače -->
+        <div class="upload-zone" id="upload-zone" onclick="handleFileUpload()">
+          <span class="upload-icon">📁</span>
+          <p class="upload-title">Nahrát soubor z počítače</p>
+          <p class="upload-hint">Klikněte nebo přetáhněte soubor</p>
+          <div class="file-tags">
+            <span class="file-tag">CSV</span>
+            <span class="file-tag">XLSX</span>
+            <span class="file-tag">JSON</span>
+          </div>
+        </div>
+
+        <!-- Vložit z Google Sheets -->
+        <div class="upload-zone sheets-zone">
+          <span class="upload-icon">📊</span>
+          <div class="input-row">
+            <label for="sheets-url">Vložit odkaz</label>
+            <p class="upload-hint">Klikněte pro vložení odkazu</p>
+            <input type="text" id="sheets-url" placeholder="https://docs.google.com/spreadsheets/d/...">
+          </div>
+        </div>
+      </div>
+
+      <p class="hero-desc" style="margin-bottom: 1rem; font-size: 0.9rem;">
+        Vložte soubor dat obsahující ID produktů a jejich tržby, případně název a kategorii.
+      </p>
+
+      <!-- Tlačítko spustit analýzu -->
+      <button class="btn btn-primary" id="btn-start" onclick="handleStart()">
+        Spustit analýzu
+        <span class="arrow">→</span>
+      </button>
+    </div>
+  </section>
+
+
+  <script>
+    /* ═══════════════════════════════════════════════
+       JAVASCRIPT – handlery
+
+       Zatím pouze zobrazují alert jako placeholder.
+       Sem budeš v budoucnu přidávat skutečnou logiku:
+       – handleFileUpload() → otevře file picker
+       – handleStart() → spustí analýzu
+    ═══════════════════════════════════════════════ */
+
+    function handleFileUpload() {
+      alert('📂 File picker bude otevřen zde – připravujeme upload funkcionalitu!');
+    }
+
+    function handleStart() {
+      alert('🚀 Analýza bude spuštěna zde – zatím pracujeme na implementaci!');
+    }
+  </script>
+
+</body>
+</html>
