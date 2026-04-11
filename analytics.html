@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Analytics – GA4</title>
+
+  <style>
+    :root {
+      --clr-bg:        #073027;
+      --clr-surface:   #0c3d30;
+      --clr-surface-2: #0f4535;
+      --clr-border:    #154d3e;
+      --clr-accent:    #ff4921;
+      --clr-accent-lt: #ff6e4a;
+      --clr-text:      #e8e6df;
+      --clr-muted:     #7aad9a;
+      --clr-top:       #ff4921;
+      --clr-mid:       #f5a623;
+      --clr-tail:      #4a9fd4;
+      --clr-danger:    #e74c3c;
+      --clr-warning:   #f39c12;
+      --clr-success:   #2ecc71;
+      --clr-info:      #4a9fd4;
+      --font:          Arial, sans-serif;
+      --radius:        6px;
+      --transition:    0.25s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--clr-bg);
+      color: var(--clr-text);
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image:
+        linear-gradient(rgba(255,73,33,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,73,33,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(7,48,39,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .nav-logo { font-size: 1.1rem; font-weight: 600; color: var(--clr-accent); text-decoration: none; letter-spacing:.04em; }
+    .nav-meta  { font-size: .75rem; color: var(--clr-muted); letter-spacing:.08em; text-transform:uppercase; }
+    .nav-back  { font-size:.78rem; color:var(--clr-muted); text-decoration:none; border:1px solid var(--clr-border); padding:.35rem .85rem; border-radius:var(--radius); transition:all var(--transition); letter-spacing:.05em; }
+    .nav-back:hover { color:var(--clr-accent); border-color:var(--clr-accent); }
+
+    /* LAYOUT */
+    main { max-width: 1280px; margin: 0 auto; padding: 8rem 2.5rem 4rem; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 2.5rem; animation: fadeUp .7s ease both; }
+    .page-eyebrow { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--clr-accent); margin-bottom:.5rem; display:flex; align-items:center; gap:.6rem; }
+    .page-eyebrow::before { content:''; display:block; width:24px; height:1.5px; background:var(--clr-accent); }
+    .page-title { font-size: clamp(1.6rem,3vw,2.4rem); font-weight:300; line-height:1.1; margin-bottom:.5rem; }
+    .page-title em { font-style:italic; color:var(--clr-accent); }
+    .page-sub { font-size:.88rem; color:var(--clr-muted); }
+
+    /* SECTION LABELS */
+    .section-label { font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--clr-accent); margin-bottom:1rem; }
+    .section-gap { margin-top: 2.5rem; }
+
+    /* ── OVERVIEW GRID ───────────────────────────── */
+    .overview-grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap:1px;
+      background: var(--clr-border); border:1px solid var(--clr-border);
+      border-radius:var(--radius); overflow:hidden; margin-bottom:2rem;
+      animation: fadeUp .7s ease both;
+    }
+    .overview-card { background:var(--clr-surface); padding:1.8rem; transition:background var(--transition); }
+    .overview-card:hover { background:var(--clr-surface-2); }
+    .ov-label { font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--clr-muted); margin-bottom:.5rem; }
+    .ov-value { font-size:2rem; font-weight:600; color:var(--clr-accent); line-height:1; margin-bottom:.3rem; }
+    .ov-note  { font-size:.75rem; color:var(--clr-muted); }
+    .ov-delta {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .72rem; font-weight: 600; padding: .15rem .5rem;
+      border-radius: 3px; margin-top: .45rem;
+    }
+    .delta-up   { background: rgba(46,204,113,.15); color: var(--clr-success); }
+    .delta-down { background: rgba(231,76,60,.15);  color: var(--clr-danger); }
+    .delta-flat { background: rgba(122,173,154,.1); color: var(--clr-muted); }
+
+    /* ── PORTFOLIO MANAGEMENT ────────────────────── */
+    .portfolio-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap:1rem;
+      margin-bottom:2.5rem; animation: fadeUp .72s ease both;
+    }
+    .portfolio-card {
+      background:var(--clr-surface); border:1px solid var(--clr-border);
+      border-radius:var(--radius); padding:1.6rem; transition:background var(--transition);
+    }
+    .portfolio-card:hover { background:var(--clr-surface-2); }
+    .pc-icon  { font-size:1.4rem; margin-bottom:.7rem; }
+    .pc-label { font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--clr-muted); margin-bottom:.4rem; }
+    .pc-value { font-size:1.8rem; font-weight:600; color:var(--clr-accent); line-height:1; margin-bottom:.3rem; }
+    .pc-note  { font-size:.75rem; color:var(--clr-muted); line-height:1.5; }
+
+    /* ── SEGMENTS ────────────────────────────────── */
+    .segments-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
+      margin-bottom:1.5rem; animation: fadeUp .78s ease both;
+    }
+    .segment-card { background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; transition:background var(--transition); }
+    .segment-card:hover { background:var(--clr-surface-2); }
+    .seg-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .seg-badge  { font-size:.65rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:.25rem .65rem; border-radius:3px; }
+    .badge-TOP  { background:rgba(255,73,33,.15);  color:var(--clr-top); }
+    .badge-MID  { background:rgba(245,166,35,.15); color:var(--clr-mid); }
+    .badge-TAIL { background:rgba(74,159,212,.15); color:var(--clr-tail); }
+    .seg-count  { font-size:.75rem; color:var(--clr-muted); }
+    .seg-revenue{ font-size:1.8rem; font-weight:600; line-height:1; margin-bottom:.25rem; }
+    .rev-TOP    { color:var(--clr-top); }
+    .rev-MID    { color:var(--clr-mid); }
+    .rev-TAIL   { color:var(--clr-tail); }
+    .seg-share  { font-size:.78rem; color:var(--clr-muted); margin-bottom:1rem; }
+    .seg-bar-track { height:4px; background:var(--clr-border); border-radius:2px; overflow:hidden; }
+    .seg-bar-fill  { height:100%; border-radius:2px; }
+    .fill-TOP  { background:var(--clr-top); }
+    .fill-MID  { background:var(--clr-mid); }
+    .fill-TAIL { background:var(--clr-tail); }
+
+    /* ── CATEGORY BREAKDOWN ──────────────────────── */
+    .category-breakdown {
+      background:var(--clr-surface); border:1px solid var(--clr-border);
+      border-radius:var(--radius); padding:1.5rem 1.8rem;
+      margin-bottom:2.5rem; animation: fadeUp .8s ease both;
+    }
+    .cb-title { font-size:.82rem; font-weight:500; margin-bottom:1.2rem; }
+    .cb-row { display:grid; grid-template-columns:130px 1fr 70px 80px; align-items:center; gap:1rem; margin-bottom:.7rem; }
+    .cb-name  { font-size:.8rem; color:var(--clr-text); }
+    .cb-track { height:6px; background:var(--clr-border); border-radius:3px; overflow:hidden; }
+    .cb-fill  { height:100%; background:var(--clr-accent); border-radius:3px; opacity:.85; }
+    .cb-rev   { font-size:.78rem; color:var(--clr-text); text-align:right; font-variant-numeric:tabular-nums; }
+    .cb-pct   { font-size:.72rem; color:var(--clr-muted); text-align:right; }
+
+    /* ── TABLE BASE ──────────────────────────────── */
+    .table-wrap { background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); overflow:hidden; margin-bottom:2.5rem; animation:fadeUp .82s ease both; }
+    .table-toolbar {
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding:1.2rem 1.5rem; border-bottom:1px solid var(--clr-border);
+      flex-wrap:wrap; gap:.8rem;
+    }
+    .table-title { font-size:.85rem; font-weight:500; padding-top:.15rem; }
+    .filter-groups  { display:flex; flex-direction:column; gap:.5rem; align-items:flex-end; }
+    .filter-group   { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .filter-group-lbl { font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--clr-muted); white-space:nowrap; min-width:52px; text-align:right; }
+    .filter-tabs  { display:flex; gap:.35rem; flex-wrap:wrap; }
+    .filter-tab   { font-size:.68rem; padding:.25rem .65rem; border-radius:3px; border:1px solid var(--clr-border); background:transparent; color:var(--clr-muted); cursor:pointer; transition:all var(--transition); letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
+    .filter-tab:hover, .filter-tab.active { border-color:var(--clr-accent); color:var(--clr-accent); }
+
+    table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    thead tr { background:var(--clr-surface-2); border-bottom:1px solid var(--clr-border); }
+    th { padding:.9rem 1rem; text-align:left; font-size:.67rem; letter-spacing:.1em; text-transform:uppercase; color:var(--clr-muted); font-weight:500; white-space:nowrap; }
+    th.right, td.right { text-align:right; }
+    th.center, td.center { text-align:center; }
+    tbody tr { border-bottom:1px solid var(--clr-border); transition:background var(--transition); }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--clr-surface-2); }
+    td { padding:.8rem 1rem; vertical-align:middle; }
+    .prod-name { font-weight:500; }
+    .prod-id   { font-size:.7rem; color:var(--clr-muted); margin-top:.1rem; }
+    .cat-pill  { font-size:.65rem; padding:.2rem .55rem; border-radius:3px; background:rgba(122,173,154,.12); color:var(--clr-muted); border:1px solid var(--clr-border); white-space:nowrap; }
+    .seg-pill  { font-size:.62rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase; padding:.22rem .6rem; border-radius:3px; display:inline-block; cursor:default; }
+    .revenue-bar { display:flex; align-items:center; gap:.5rem; justify-content:flex-end; }
+    .rev-bar-track { width:38px; height:3px; background:var(--clr-border); border-radius:2px; flex-shrink:0; }
+    .rev-bar-fill  { height:100%; background:var(--clr-accent); border-radius:2px; }
+    .rate-good { color:var(--clr-success); }
+    .rate-warn { color:var(--clr-warning); }
+    .rate-bad  { color:var(--clr-danger); }
+
+    /* ── SORTABLE HEADERS ────────────────────────── */
+    th.sortable { cursor:pointer; user-select:none; }
+    th.sortable:hover { color:var(--clr-text); }
+    th.sortable .sarr { display:inline-block; margin-left:.3rem; opacity:.3; font-size:.6rem; }
+    th.sortable:hover .sarr { opacity:.65; }
+    th.sort-asc  .sarr,
+    th.sort-desc .sarr { opacity:1; color:var(--clr-accent); }
+
+    /* ── DECISION LABEL BADGES ───────────────────── */
+    .badge-SCALE        { background:rgba(46,204,113,.18);  color:#2ecc71; }
+    .badge-OPTIMIZE     { background:rgba(243,156,18,.18);  color:#f39c12; }
+    .badge-LOW_PRIORITY { background:rgba(231,76,60,.15);   color:#e74c3c; }
+    .badge-WATCH        { background:rgba(74,159,212,.15);  color:#4a9fd4; }
+
+    /* ── RPV HEATMAP ─────────────────────────────── */
+    .rpv-q4 { color:#2ecc71; font-weight:600; }
+    .rpv-q3 { color:#82d9a0; }
+    .rpv-q2 { color:#f39c12; }
+    .rpv-q1 { color:#e74c3c; }
+
+    /* ── FUNNEL SCORE ────────────────────────────── */
+    .fscore-wrap  { display:flex; flex-direction:column; gap:.2rem; min-width:72px; }
+    .fscore-top   { display:flex; align-items:baseline; gap:.25rem; }
+    .fscore-val   { font-size:.82rem; font-weight:600; }
+    .fscore-denom { font-size:.6rem; color:var(--clr-muted); }
+    .fscore-track { height:3px; background:var(--clr-border); border-radius:2px; overflow:hidden; }
+    .fscore-fill  { height:100%; border-radius:2px; }
+    .fscore-good  { background:var(--clr-success); }
+    .fscore-warn  { background:var(--clr-warning); }
+    .fscore-bad   { background:var(--clr-danger); }
+    .fval-good { color:var(--clr-success); }
+    .fval-warn { color:var(--clr-warning); }
+    .fval-bad  { color:var(--clr-danger); }
+
+    /* ── OPPORTUNITY SCORE CELL ──────────────────── */
+    .opp-cell { font-variant-numeric:tabular-nums; white-space:nowrap; font-size:.8rem; }
+    .opp-cell.is-top { color:var(--clr-accent); font-weight:700; }
+
+    /* ── TOP OPPORTUNITIES SECTION ───────────────── */
+    .opps-section { margin-bottom:2.5rem; animation:fadeUp .83s ease both; }
+    .opps-panel { background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); overflow:hidden; }
+    .opps-panel-header {
+      padding:1.2rem 1.5rem; border-bottom:1px solid var(--clr-border);
+      border-left:3px solid var(--clr-accent);
+      display:flex; align-items:center; gap:.8rem;
+    }
+    .opps-ph-icon  { font-size:1.3rem; }
+    .opps-ph-title { font-size:.88rem; font-weight:500; }
+    .opps-ph-sub   { font-size:.72rem; color:var(--clr-muted); margin-top:.1rem; }
+    .opps-col-hd {
+      display:grid;
+      grid-template-columns: 28px 1fr 72px 65px 72px 65px 100px 110px;
+      gap:.6rem; padding:.5rem 1.5rem;
+      font-size:.62rem; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--clr-muted); background:var(--clr-surface-2);
+      border-bottom:1px solid var(--clr-border);
+    }
+    .opps-row {
+      display:grid;
+      grid-template-columns: 28px 1fr 72px 65px 72px 65px 100px 110px;
+      align-items:center; gap:.6rem;
+      padding:.9rem 1.5rem;
+      border-bottom:1px solid var(--clr-border);
+      font-size:.8rem; transition:background var(--transition);
+    }
+    .opps-row:last-child { border-bottom:none; }
+    .opps-row:hover      { background:var(--clr-surface-2); }
+    .opps-rank {
+      width:22px; height:22px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.65rem; font-weight:700; flex-shrink:0;
+    }
+    .opps-rank.fire { background:var(--clr-accent); color:#fff; }
+    .opps-rank.rest { background:var(--clr-surface-2); color:var(--clr-muted); border:1px solid var(--clr-border); }
+    .opps-name  { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .opps-cat   { font-size:.68rem; color:var(--clr-muted); }
+    .opps-num   { text-align:right; font-variant-numeric:tabular-nums; font-size:.78rem; }
+    .opps-score { text-align:right; font-variant-numeric:tabular-nums; }
+    .opps-score.fire { font-size:.92rem; font-weight:700; color:var(--clr-accent); }
+    .opps-score.rest { font-size:.82rem; font-weight:500; color:var(--clr-text); }
+    .o-right { text-align:right; }
+
+    /* ── FUNNEL ANALYSIS ─────────────────────────── */
+    .funnel-section { margin-bottom:2.5rem; animation:fadeUp .84s ease both; }
+    .funnel-2col { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .funnel-panel { background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); overflow:hidden; }
+    .funnel-panel-header { padding:1.2rem 1.5rem; border-bottom:1px solid var(--clr-border); display:flex; align-items:center; gap:.8rem; }
+    .fp-icon  { font-size:1.2rem; }
+    .fp-title { font-size:.88rem; font-weight:500; }
+    .fp-sub   { font-size:.72rem; color:var(--clr-muted); margin-top:.1rem; }
+    .funnel-product-row {
+      display:grid; grid-template-columns:1fr repeat(3,80px);
+      align-items:center; gap:.8rem; padding:.9rem 1.5rem;
+      border-bottom:1px solid var(--clr-border); font-size:.8rem;
+      transition:background var(--transition);
+    }
+    .funnel-product-row:last-child { border-bottom:none; }
+    .funnel-product-row:hover { background:var(--clr-surface-2); }
+    .fp-prod-name { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .fp-prod-cat  { font-size:.68rem; color:var(--clr-muted); }
+    .fp-metric    { text-align:center; }
+    .fp-metric-val { font-weight:600; font-size:.85rem; }
+    .fp-metric-lbl { font-size:.62rem; color:var(--clr-muted); text-transform:uppercase; letter-spacing:.05em; }
+    .funnel-col-headers {
+      display:grid; grid-template-columns:1fr repeat(3,80px);
+      gap:.8rem; padding:.5rem 1.5rem;
+      font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--clr-muted);
+      border-bottom:1px solid var(--clr-border); background:var(--clr-surface-2);
+    }
+    .fch-right { text-align:center; }
+
+    /* ── REVENUE TRENDS ──────────────────────────── */
+    .trends-section { margin-bottom: 2.5rem; animation: fadeUp .86s ease both; }
+    .trends-2col    { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .trend-panel { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius); overflow: hidden; }
+    .trend-panel-header {
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--clr-border);
+      display: flex; align-items: center; gap: .8rem;
+    }
+    .trend-panel-header.decline { border-left: 3px solid var(--clr-danger); }
+    .trend-panel-header.growth  { border-left: 3px solid var(--clr-success); }
+    .tp-icon  { font-size: 1.2rem; }
+    .tp-title { font-size: .88rem; font-weight: 500; }
+    .tp-sub   { font-size: .72rem; color: var(--clr-muted); margin-top: .1rem; }
+    .trend-col-headers {
+      display: grid; grid-template-columns: 22px 1fr 75px 75px 85px;
+      gap: .6rem; padding: .5rem 1.5rem;
+      font-size: .62rem; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--clr-muted); background: var(--clr-surface-2);
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .tch-right { text-align: right; }
+    .trend-row {
+      display: grid; grid-template-columns: 22px 1fr 75px 75px 85px;
+      align-items: center; gap: .6rem; padding: .8rem 1.5rem;
+      border-bottom: 1px solid var(--clr-border); font-size: .8rem;
+      transition: background var(--transition);
+    }
+    .trend-row:last-child { border-bottom: none; }
+    .trend-row:hover { background: var(--clr-surface-2); }
+    .tr-rank { font-size: .7rem; color: var(--clr-muted); text-align: center; }
+    .tr-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tr-cat  { font-size: .68rem; color: var(--clr-muted); }
+    .tr-rev  { text-align: right; font-variant-numeric: tabular-nums; font-size: .78rem; }
+    .tr-prev { text-align: right; font-variant-numeric: tabular-nums; font-size: .72rem; color: var(--clr-muted); }
+    .tr-badge {
+      display: inline-flex; align-items: center; justify-content: flex-end;
+      gap: .25rem; font-size: .72rem; font-weight: 700;
+      padding: .2rem .55rem; border-radius: 3px; white-space: nowrap; width: 100%;
+    }
+    .tr-badge.decline { background: rgba(231,76,60,.15);  color: var(--clr-danger); }
+    .tr-badge.growth  { background: rgba(46,204,113,.15); color: var(--clr-success); }
+    .trend-no-compare { padding: 2.5rem 1.5rem; text-align: center; font-size: .82rem; color: var(--clr-muted); }
+    @media(max-width:1024px){ .trends-2col { grid-template-columns: 1fr; } }
+
+    /* ── ADVANCED METRICS ────────────────────────── */
+    .advanced-section { animation:fadeUp .88s ease both; }
+    .advanced-top { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
+    .adv-card { background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.6rem; transition:background var(--transition); }
+    .adv-card:hover { background:var(--clr-surface-2); }
+    .adv-label   { font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--clr-muted); margin-bottom:.4rem; }
+    .adv-value   { font-size:2rem; font-weight:600; color:var(--clr-accent); line-height:1; margin-bottom:.3rem; }
+    .adv-note    { font-size:.75rem; color:var(--clr-muted); line-height:1.5; }
+    .adv-formula { font-size:.68rem; color:var(--clr-border); margin-top:.4rem; font-family:monospace; border-top:1px solid var(--clr-border); padding-top:.4rem; }
+
+    /* FOOTER */
+    footer { max-width:1280px; margin:0 auto; padding:1.5rem 2.5rem; border-top:1px solid var(--clr-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.8rem; }
+    .footer-meta { font-size:.72rem; color:var(--clr-muted); }
+    .api-badge { font-size:.65rem; color:var(--clr-muted); border:1px solid var(--clr-border); padding:.25rem .65rem; border-radius:3px; letter-spacing:.07em; text-transform:uppercase; font-family:monospace; }
+
+    /* LOADING */
+    #loading { position:fixed; inset:0; background:var(--clr-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:999; transition:opacity .4s ease; }
+    #loading.hide { opacity:0; pointer-events:none; }
+    .spinner { width:36px; height:36px; border:2px solid var(--clr-border); border-top-color:var(--clr-accent); border-radius:50%; animation:spin .8s linear infinite; }
+    .loading-txt { font-size:.78rem; color:var(--clr-muted); letter-spacing:.1em; text-transform:uppercase; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes spin   { to{transform:rotate(360deg)} }
+
+    /* ── DATE FILTER BAR ─────────────────────────── */
+    .date-bar {
+      position: fixed; top: 57px; left: 0; right: 0; z-index: 99;
+      display: flex; align-items: center; gap: 1.2rem;
+      padding: .6rem 2.5rem;
+      background: rgba(7,48,39,0.97); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--clr-border); flex-wrap: wrap;
+    }
+    .db-label { font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--clr-muted); white-space:nowrap; }
+    .db-presets { display:flex; gap:.35rem; flex-wrap:wrap; }
+    .db-btn {
+      font-size:.72rem; font-weight:500; letter-spacing:.05em; padding:.3rem .85rem; border-radius:3px;
+      border:1px solid var(--clr-border); background:transparent; color:var(--clr-muted);
+      cursor:pointer; transition:all var(--transition); white-space:nowrap;
+    }
+    .db-btn:hover { border-color:var(--clr-accent); color:var(--clr-accent); }
+    .db-btn.active { background:var(--clr-accent); border-color:var(--clr-accent); color:#0b0f1a; }
+    .db-divider { width:1px; height:18px; background:var(--clr-border); flex-shrink:0; }
+    .db-range-display { font-size:.75rem; color:var(--clr-muted); white-space:nowrap; }
+    .db-range-display strong { color:var(--clr-text); font-weight:500; }
+    .db-custom { display:none; align-items:center; gap:.5rem; }
+    .db-custom.visible { display:flex; }
+    .db-custom input[type="date"] {
+      padding:.28rem .6rem; border:1px solid var(--clr-border); border-radius:3px;
+      background:var(--clr-surface); color:var(--clr-text); font-size:.72rem;
+      font-family:var(--font); cursor:pointer; transition:border-color var(--transition); color-scheme:dark;
+    }
+    .db-custom input[type="date"]:focus { outline:none; border-color:var(--clr-accent); }
+    .db-arrow { font-size:.7rem; color:var(--clr-muted); }
+    .db-apply {
+      font-size:.7rem; padding:.28rem .7rem; border-radius:3px;
+      border:1px solid var(--clr-accent); background:transparent;
+      color:var(--clr-accent); cursor:pointer; transition:all var(--transition); white-space:nowrap;
+    }
+    .db-apply:hover { background:var(--clr-accent); color:#0b0f1a; }
+
+    @media(max-width:1024px){
+      .funnel-2col  { grid-template-columns:1fr; }
+      .advanced-top { grid-template-columns:repeat(2,1fr); }
+      .opps-col-hd, .opps-row { grid-template-columns: 28px 1fr 65px 65px 1fr; }
+      .opps-col-hd > *:nth-child(4),
+      .opps-col-hd > *:nth-child(5),
+      .opps-col-hd > *:nth-child(7),
+      .opps-row > *:nth-child(4),
+      .opps-row > *:nth-child(5),
+      .opps-row > *:nth-child(7) { display:none; }
+    }
+    @media(max-width:900px){
+      .overview-grid  { grid-template-columns:repeat(2,1fr); }
+      .portfolio-grid { grid-template-columns:1fr; }
+      .segments-grid  { grid-template-columns:1fr; }
+      nav             { padding:.9rem 1.2rem; }
+      main            { padding:7.5rem 1.2rem 3rem; }
+      .date-bar       { padding:.6rem 1.2rem; top:53px; }
+    }
+    @media(max-width:600px){
+      .overview-grid    { grid-template-columns:1fr; }
+      .advanced-top     { grid-template-columns:1fr; }
+      .filter-tabs      { display:none; }
+      .db-range-display { display:none; }
+      .db-divider       { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="loading-txt">Processing GA4 data…</p>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="idex1.html">Portfolio Analysis</a>
+  <span class="nav-meta" id="nav-range">Last 90 days</span>
+  <a class="nav-back" href="idex1.html">← Back</a>
+</nav>
+
+<!-- DATE FILTER BAR -->
+<div class="date-bar">
+  <span class="db-label">Period</span>
+  <div class="db-presets">
+    <button class="db-btn" onclick="applyPreset(30,this)">Last 30d</button>
+    <button class="db-btn" onclick="applyPreset(60,this)">Last 60d</button>
+    <button class="db-btn active" id="btn-90" onclick="applyPreset(90,this)">Last 90d</button>
+    <button class="db-btn" onclick="applyPreset(365,this)">Last 365d</button>
+    <button class="db-btn" id="btn-custom" onclick="toggleCustom(this)">Custom</button>
+  </div>
+  <div class="db-divider"></div>
+  <div class="db-custom" id="db-custom">
+    <input type="date" id="custom-from" />
+    <span class="db-arrow">→</span>
+    <input type="date" id="custom-to" />
+    <button class="db-apply" onclick="applyCustomRange()">Apply</button>
+  </div>
+  <span class="db-range-display" id="db-range-display">
+    Displaying: <strong id="db-range-label">Last 90 days</strong>
+    &nbsp;·&nbsp; <span id="db-date-span"></span>
+  </span>
+  <div class="db-divider"></div>
+  <span class="db-label">Compare vs</span>
+  <div class="db-presets">
+    <button class="db-btn active" id="cmp-prev" onclick="setCompare('prev',this)">Previous period</button>
+    <button class="db-btn" id="cmp-yoy"  onclick="setCompare('yoy',this)">YoY</button>
+    <button class="db-btn" id="cmp-none" onclick="setCompare('none',this)">None</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-eyebrow">GA4 Analytics Engine</div>
+    <h1 class="page-title">Product <em>Portfolio</em> Report</h1>
+    <p class="page-sub" id="report-sub">Generating report…</p>
+  </div>
+
+  <!-- 1. OVERVIEW -->
+  <p class="section-label">Overview</p>
+  <div class="overview-grid" id="overview-grid"></div>
+
+  <!-- 2. PRODUCT PORTFOLIO MANAGEMENT -->
+  <div class="section-gap">
+    <p class="section-label">Product Portfolio Management</p>
+    <div class="portfolio-grid" id="portfolio-grid"></div>
+  </div>
+
+  <!-- 3. REVENUE SEGMENTS -->
+  <div class="section-gap">
+    <p class="section-label">Revenue Segments</p>
+    <div class="segments-grid" id="segments-grid"></div>
+    <div class="category-breakdown" id="category-breakdown"></div>
+  </div>
+
+  <!-- 4. ALL PRODUCTS TABLE -->
+  <div class="section-gap">
+    <p class="section-label">All Products</p>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <span class="table-title">Product List</span>
+        <div class="filter-groups">
+          <div class="filter-group">
+            <span class="filter-group-lbl">Segment</span>
+            <div class="filter-tabs">
+              <button class="filter-tab ftab-segment active" onclick="filterTable('segment','ALL',this)">All</button>
+              <button class="filter-tab ftab-segment" onclick="filterTable('segment','TOP',this)">Top</button>
+              <button class="filter-tab ftab-segment" onclick="filterTable('segment','MID',this)">Mid</button>
+              <button class="filter-tab ftab-segment" onclick="filterTable('segment','LONG_TAIL',this)">Long Tail</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-group-lbl">Decision</span>
+            <div class="filter-tabs">
+              <button class="filter-tab ftab-label active" onclick="filterTable('label','ALL',this)">All</button>
+              <button class="filter-tab ftab-label" onclick="filterTable('label','SCALE',this)">🟢 Scale</button>
+              <button class="filter-tab ftab-label" onclick="filterTable('label','OPTIMIZE',this)">🟡 Optimize</button>
+              <button class="filter-tab ftab-label" onclick="filterTable('label','LOW_PRIORITY',this)">🔴 Low Priority</button>
+              <button class="filter-tab ftab-label" onclick="filterTable('label','WATCH',this)">🔵 Watch</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="products-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. TOP OPPORTUNITIES -->
+  <div class="section-gap opps-section">
+    <p class="section-label">🔥 Top Opportunities</p>
+    <div class="opps-panel">
+      <div class="opps-panel-header">
+        <span class="opps-ph-icon">🎯</span>
+        <div>
+          <div class="opps-ph-title">High-Potential Underperforming Products</div>
+          <div class="opps-ph-sub">Score = Views × (1 − CVR) × AOV — products leaving the most unconverted revenue on the table</div>
+        </div>
+      </div>
+      <div class="opps-col-hd">
+        <span>#</span>
+        <span>Product</span>
+        <span class="o-right">Views</span>
+        <span class="o-right">CVR</span>
+        <span class="o-right">AOV</span>
+        <span class="o-right">RPV</span>
+        <span>Decision</span>
+        <span class="o-right">Opp. Score</span>
+      </div>
+      <div id="opp-list"></div>
+    </div>
+  </div>
+
+  <!-- 6. FUNNEL ANALYSIS -->
+  <div class="section-gap funnel-section">
+    <p class="section-label">Funnel Analysis</p>
+    <div class="funnel-2col">
+
+      <div class="funnel-panel">
+        <div class="funnel-panel-header">
+          <span class="fp-icon">🛒</span>
+          <div>
+            <div class="fp-title">High Cart Abandonment</div>
+            <div class="fp-sub">High add-to-cart · low checkout conversion</div>
+          </div>
+        </div>
+        <div class="funnel-col-headers">
+          <span>Product</span>
+          <span class="fch-right">Carts</span>
+          <span class="fch-right">Cart→Buy</span>
+          <span class="fch-right">Lost rev.</span>
+        </div>
+        <div id="abandonment-list"></div>
+      </div>
+
+      <div class="funnel-panel">
+        <div class="funnel-panel-header">
+          <span class="fp-icon">🏆</span>
+          <div>
+            <div class="fp-title">Top Performers</div>
+            <div class="fp-sub">Strong view → cart → purchase flow</div>
+          </div>
+        </div>
+        <div class="funnel-col-headers">
+          <span>Product</span>
+          <span class="fch-right">Views</span>
+          <span class="fch-right">V→Buy</span>
+          <span class="fch-right">Revenue</span>
+        </div>
+        <div id="top-performers-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 7. REVENUE TRENDS -->
+  <div class="section-gap trends-section">
+    <p class="section-label">Revenue Trends</p>
+    <div class="trends-2col">
+
+      <div class="trend-panel">
+        <div class="trend-panel-header decline">
+          <span class="tp-icon">📉</span>
+          <div>
+            <div class="tp-title">Top 10 — Significant Decline</div>
+            <div class="tp-sub">Products with the sharpest revenue drop vs. comparison period</div>
+          </div>
+        </div>
+        <div class="trend-col-headers">
+          <span>#</span><span>Product</span>
+          <span class="tch-right">Current</span>
+          <span class="tch-right">Previous</span>
+          <span class="tch-right">Change</span>
+        </div>
+        <div id="trend-decline-list"></div>
+      </div>
+
+      <div class="trend-panel">
+        <div class="trend-panel-header growth">
+          <span class="tp-icon">📈</span>
+          <div>
+            <div class="tp-title">Top 10 — Strong Growth</div>
+            <div class="tp-sub">Products with the strongest revenue increase vs. comparison period</div>
+          </div>
+        </div>
+        <div class="trend-col-headers">
+          <span>#</span><span>Product</span>
+          <span class="tch-right">Current</span>
+          <span class="tch-right">Previous</span>
+          <span class="tch-right">Change</span>
+        </div>
+        <div id="trend-growth-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 8. ADVANCED METRICS -->
+  <div class="section-gap advanced-section">
+    <p class="section-label">Advanced Metrics</p>
+    <div class="advanced-top" id="advanced-cards"></div>
+  </div>
+
+</main>
+
+<footer>
+  <span class="footer-meta" id="footer-meta"></span>
+  <span class="api-badge">GET /analytics/products?range=90d</span>
+</footer>
+
+
+<script>
+/* ================================================================
+   LAYER 1 – GA4 DATA  (mock — replace with live API in production)
+================================================================ */
+const GA4_CONFIG = { propertyId: 'DEMO-123456789', rangeDays: 90 };
+
+const PRODUCTS_RAW = [
+  { id:'P001', name:'Running Shoes Pro X',   category:'Footwear',    price:185, views:5200, carts:420, orders:100, units:120, revenue:18500 },
+  { id:'P002', name:'Protein Powder Vanilla',category:'Nutrition',   price:55,  views:4100, carts:580, orders:224, units:403, revenue:12320 },
+  { id:'P003', name:'Yoga Mat Premium',      category:'Equipment',   price:82,  views:2800, carts:310, orders:120, units:120, revenue:9840  },
+  { id:'P004', name:'Fitness Tracker',       category:'Wearables',   price:155, views:8500, carts:180, orders:40,  units:40,  revenue:6200  },
+  { id:'P005', name:'Water Bottle 1L',       category:'Accessories', price:28,  views:3200, carts:480, orders:136, units:299, revenue:3808  },
+  { id:'P006', name:'Resistance Bands Set',  category:'Equipment',   price:35,  views:2400, carts:520, orders:84,  units:126, revenue:2940  },
+  { id:'P007', name:'Foam Roller',           category:'Recovery',    price:42,  views:1600, carts:195, orders:50,  units:50,  revenue:2100  },
+  { id:'P008', name:'Pre-Workout Powder',    category:'Nutrition',   price:48,  views:1900, carts:220, orders:38,  units:76,  revenue:1824  },
+  { id:'P009', name:'Gym Gloves',            category:'Accessories', price:22,  views:1100, carts:280, orders:44,  units:66,  revenue:968   },
+  { id:'P010', name:'Jump Rope',             category:'Equipment',   price:18,  views:920,  carts:125, orders:40,  units:40,  revenue:720   },
+  { id:'P011', name:'Kettlebell 16kg',       category:'Equipment',   price:80,  views:650,  carts:62,  orders:8,   units:8,   revenue:640   },
+  { id:'P012', name:'Pull-up Bar',           category:'Equipment',   price:48,  views:3800, carts:95,  orders:12,  units:12,  revenue:576   },
+  { id:'P013', name:'Blender Bottle',        category:'Accessories', price:24,  views:580,  carts:65,  orders:18,  units:45,  revenue:432   },
+  { id:'P014', name:'Compression Socks',     category:'Recovery',    price:20,  views:420,  carts:45,  orders:14,  units:42,  revenue:280   },
+  { id:'P015', name:'Sports Towel',          category:'Accessories', price:16,  views:320,  carts:30,  orders:12,  units:24,  revenue:192   },
+];
+
+/* ================================================================
+   CONFIG
+================================================================ */
+const THRESHOLDS = {
+  TOP_RANK_PCT:           0.20,
+  MID_RANK_PCT:           0.50,
+  GOOD_V2C:               0.10,
+  WARN_V2C:               0.05,
+  GOOD_C2P:               0.25,
+  WARN_C2P:               0.15,
+  ABANDONMENT_CARTS_MIN:  50,
+  ABANDONMENT_C2P_MAX:    0.17,
+  TOP_PERF_V2C_MIN:       0.08,
+  TOP_PERF_C2P_MIN:       0.25,
+  FSCORE_GOOD:            22,   // Funnel Score thresholds (0–100)
+  FSCORE_WARN:            13,
+  CVR_GOOD:               0.03, // View→Purchase CVR
+  CVR_WARN:               0.015,
+};
+
+const LTV_CONFIG = { purchasesPerYear: 3.8, lifespanYears: 2.2 };
+
+/* ================================================================
+   LAYER 2 – ANALYTICS ENGINE
+================================================================ */
+
+/** Primary enrichment — adds funnel rates, segment, RPV, Funnel Score, Opportunity Score */
+function enrich(raw) {
+  const total  = raw.reduce((s,p) => s + p.revenue, 0);
+  const sorted = [...raw].sort((a,b) => b.revenue - a.revenue);
+  const n      = sorted.length;
+  const topCut = Math.max(1, Math.round(n * THRESHOLDS.TOP_RANK_PCT));
+  const midCut = Math.max(topCut + 1, Math.round(n * THRESHOLDS.MID_RANK_PCT));
+
+  return sorted.map((p, i) => {
+    const v2c  = p.views > 0 ? p.carts  / p.views  : 0;
+    const c2p  = p.carts > 0 ? p.orders / p.carts  : 0;
+    const v2p  = p.views > 0 ? p.orders / p.views  : 0;
+    const seg  = i < topCut ? 'TOP' : i < midCut ? 'MID' : 'LONG_TAIL';
+    const rpv  = p.views  > 0 ? p.revenue / p.views  : 0;
+    const funnelScore   = Math.round(Math.min(100, (v2c * 0.4 + c2p * 0.6) * 100));
+    const productAOV    = p.orders > 0 ? p.revenue / p.orders : p.price;
+    const opportunityScore = Math.round(p.views * (1 - v2p) * productAOV);
+    return {
+      ...p,
+      revenueShare: total > 0 ? p.revenue / total : 0,
+      funnel: { v2c, c2p, v2p },
+      segment: seg,
+      rpv,
+      funnelScore,
+      opportunityScore,
+      productAOV,
+    };
+  });
+}
+
+/**
+ * Second pass — assigns Decision Label + RPV heatmap class.
+ * Requires the full product array to compute percentile thresholds.
+ *
+ * Labels:
+ *   SCALE        — top-tier RPV + top-tier CVR  → invest & scale
+ *   OPTIMIZE     — high traffic + low CVR        → page/price/UX fix
+ *   LOW_PRIORITY — low views + low revenue       → review or cut
+ *   WATCH        — everything else               → monitor
+ */
+function addDecisionLabels(products) {
+  if (!products.length) return products;
+  const n = products.length;
+
+  const byRPV  = [...products].sort((a,b) => a.rpv          - b.rpv);
+  const byCVR  = [...products].sort((a,b) => a.funnel.v2p   - b.funnel.v2p);
+  const byView = [...products].sort((a,b) => a.views        - b.views);
+  const byRev  = [...products].sort((a,b) => a.revenue      - b.revenue);
+
+  // "High" = top-33%; "Low" = bottom-33%
+  const i66 = Math.floor(n * 0.66);
+  const i33 = Math.floor(n * 0.33);
+
+  const highRPVThresh = byRPV[i66].rpv;
+  const highCVRThresh = byCVR[i66].funnel.v2p;
+  const medViews      = byView[Math.floor(n / 2)].views;
+  const lowRevThresh  = byRev[i33].revenue;
+
+  // RPV quartiles for heatmap colouring
+  const q25rpv = byRPV[Math.floor(n * 0.25)].rpv;
+  const q50rpv = byRPV[Math.floor(n * 0.50)].rpv;
+  const q75rpv = byRPV[Math.floor(n * 0.75)].rpv;
+
+  return products.map(p => {
+    const highRPV  = p.rpv        >= highRPVThresh;
+    const highCVR  = p.funnel.v2p >= highCVRThresh;
+    const highViews = p.views     >= medViews;
+    const lowViews  = p.views     <  medViews;
+    const lowRev    = p.revenue   <= lowRevThresh;
+
+    let label, labelTooltip;
+    if      (highRPV && highCVR)      { label = 'SCALE';        labelTooltip = 'High RPV + High CVR — strong performer, increase investment & visibility'; }
+    else if (highViews && !highCVR)   { label = 'OPTIMIZE';     labelTooltip = 'High traffic but low conversion — fix product page, pricing, or description'; }
+    else if (lowViews && lowRev)      { label = 'LOW_PRIORITY'; labelTooltip = 'Low traffic and low revenue — review, reposition, or discontinue'; }
+    else                              { label = 'WATCH';        labelTooltip = 'Moderate performance — monitor for trend changes before acting'; }
+
+    const rpvClass = p.rpv >= q75rpv ? 'rpv-q4'
+                   : p.rpv >= q50rpv ? 'rpv-q3'
+                   : p.rpv >= q25rpv ? 'rpv-q2'
+                   :                   'rpv-q1';
+
+    return { ...p, label, labelTooltip, rpvClass };
+  });
+}
+
+function overview(products) {
+  const totalRevenue = products.reduce((s,p) => s + p.revenue, 0);
+  const totalOrders  = products.reduce((s,p) => s + p.orders,  0);
+  const totalViews   = products.reduce((s,p) => s + p.views,   0);
+  const active       = products.filter(p => p.revenue > 0).length;
+  const cvr          = totalViews  > 0 ? totalOrders  / totalViews  : 0;
+  const aov          = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const totalUnits   = products.reduce((s,p) => s + p.units, 0);
+  const ipo          = totalOrders > 0 ? totalUnits / totalOrders : 0;
+  const rpu          = totalViews  > 0 ? totalRevenue / totalViews  : 0;
+  const rpp          = active      > 0 ? totalRevenue / active      : 0;
+  const ltv          = aov * LTV_CONFIG.purchasesPerYear * LTV_CONFIG.lifespanYears;
+  return { totalRevenue, totalOrders, totalViews, active, cvr, aov, totalUnits, ipo, rpu, rpp, ltv };
+}
+
+function segments(products) {
+  const total = products.reduce((s,p) => s + p.revenue, 0);
+  return ['TOP','MID','LONG_TAIL'].reduce((acc, seg) => {
+    const g = products.filter(p => p.segment === seg);
+    const rev = g.reduce((s,p) => s + p.revenue, 0);
+    acc[seg] = { count: g.length, revenue: rev, share: total > 0 ? rev / total : 0 };
+    return acc;
+  }, {});
+}
+
+function categoryRevenue(products) {
+  const total = products.reduce((s,p) => s + p.revenue, 0);
+  const map   = {};
+  products.forEach(p => {
+    if (!map[p.category]) map[p.category] = { revenue: 0, count: 0 };
+    map[p.category].revenue += p.revenue;
+    map[p.category].count   += 1;
+  });
+  return Object.entries(map)
+    .map(([name,d]) => ({ name, revenue: d.revenue, count: d.count, share: total > 0 ? d.revenue / total : 0 }))
+    .sort((a,b) => b.revenue - a.revenue);
+}
+
+/* ================================================================
+   UTILS
+================================================================ */
+const fmt = {
+  currency: v => '$' + v.toLocaleString('en-US', { minimumFractionDigits:0, maximumFractionDigits:0 }),
+  pct:      v => (v * 100).toFixed(1) + '%',
+  num:      v => v.toLocaleString('en-US'),
+  dec:      v => v.toFixed(2),
+  rpv:      v => '$' + v.toFixed(2),
+  compact:  v => {
+    if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+    if (v >= 1e3) return '$' + Math.round(v / 1e3) + 'K';
+    return '$' + Math.round(v);
+  },
+};
+
+function rateClass(v, good, warn) {
+  return v >= good ? 'rate-good' : v >= warn ? 'rate-warn' : 'rate-bad';
+}
+
+/* ================================================================
+   STATE
+================================================================ */
+const BASE_DAYS = 90;
+
+let STATE = { days: 90, from: null, to: null, compareMode: 'prev' };
+
+// Table sort & filter state
+let SORT         = { col: 'revenue', dir: 'desc' };
+let TABLE_FILTER = { segment: 'ALL', label: 'ALL' };
+let CURRENT_PRODUCTS = [];  // set each refresh(), used for sort/filter re-renders
+
+/* ================================================================
+   DATA SCALING + SIMULATION
+================================================================ */
+function scaleProducts(days) {
+  const ratio = days / BASE_DAYS;
+  return PRODUCTS_RAW.map(p => ({
+    ...p,
+    views:   Math.round(p.views   * ratio),
+    carts:   Math.round(p.carts   * ratio),
+    orders:  Math.round(p.orders  * ratio),
+    units:   Math.round(p.units   * ratio),
+    revenue: Math.round(p.revenue * ratio),
+  }));
+}
+
+function simulatePrevProducts(currentScaled) {
+  function seededVariance(id, field) {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (Math.imul(31, h) + id.charCodeAt(i)) | 0;
+    const x = Math.sin(h + field.charCodeAt(0)) * 10000;
+    return 0.75 + (x - Math.floor(x)) * 0.5;
+  }
+  return currentScaled.map(p => ({
+    ...p,
+    revenue: Math.round(p.revenue * seededVariance(p.id, 'r')),
+    orders:  Math.round(p.orders  * seededVariance(p.id, 'o')),
+    views:   Math.round(p.views   * seededVariance(p.id, 'v')),
+    carts:   Math.round(p.carts   * seededVariance(p.id, 'c')),
+  }));
+}
+
+function deltaHtml(current, previous, invertColor = false) {
+  if (STATE.compareMode === 'none' || !previous || previous === 0) return '';
+  const pct   = ((current - previous) / previous) * 100;
+  const up    = pct >= 0;
+  const cls   = Math.abs(pct) < 0.5 ? 'delta-flat' : (up !== invertColor) ? 'delta-up' : 'delta-down';
+  const arrow = Math.abs(pct) < 0.5 ? '→' : up ? '▲' : '▼';
+  const label = STATE.compareMode === 'yoy' ? 'YoY' : 'vs prev';
+  return `<div class="ov-delta ${cls}">${arrow} ${Math.abs(pct).toFixed(1)}% <span style="font-weight:400;opacity:.7">${label}</span></div>`;
+}
+
+/* ================================================================
+   DATE BAR HELPERS
+================================================================ */
+function formatDateShort(d) {
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function updateDateBarDisplay(days, fromDate, toDate, label) {
+  document.getElementById('db-range-label').textContent = label;
+  document.getElementById('db-date-span').textContent   = `${formatDateShort(fromDate)} – ${formatDateShort(toDate)}`;
+  document.getElementById('nav-range').textContent      = label;
+}
+
+function applyPreset(days, btn) {
+  STATE.days = days; STATE.from = null; STATE.to = null;
+  document.getElementById('db-custom').classList.remove('visible');
+  document.getElementById('btn-custom').classList.remove('active');
+  document.querySelectorAll('.db-presets .db-btn:not(#btn-custom)').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const now = new Date(), from = new Date(now - days * 86400000);
+  updateDateBarDisplay(days, from, now, days === 365 ? 'Last 365 days' : `Last ${days} days`);
+  refresh();
+}
+
+function toggleCustom(btn) {
+  const box  = document.getElementById('db-custom');
+  const open = box.classList.toggle('visible');
+  btn.classList.toggle('active', open);
+  if (open) {
+    const now = new Date(), from = new Date(now - STATE.days * 86400000);
+    document.getElementById('custom-to').value   = now.toISOString().split('T')[0];
+    document.getElementById('custom-from').value = from.toISOString().split('T')[0];
+    document.querySelectorAll('.db-presets .db-btn:not(#btn-custom)').forEach(b => b.classList.remove('active'));
+  }
+}
+
+function applyCustomRange() {
+  const fromStr = document.getElementById('custom-from').value;
+  const toStr   = document.getElementById('custom-to').value;
+  if (!fromStr || !toStr) return;
+  const from = new Date(fromStr), to = new Date(toStr);
+  if (from >= to) { alert('Start date must be before end date.'); return; }
+  const days = Math.round((to - from) / 86400000);
+  STATE.days = days; STATE.from = from; STATE.to = to;
+  updateDateBarDisplay(days, from, to, `Custom range (${days}d)`);
+  refresh();
+}
+
+function setCompare(mode, btn) {
+  STATE.compareMode = mode;
+  document.querySelectorAll('#cmp-prev,#cmp-yoy,#cmp-none').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  refresh();
+}
+
+/* ================================================================
+   RENDER — Overview + Portfolio
+================================================================ */
+function renderOverview(ov, ovPrev) {
+  const d = (cur, prev, inv = false) => ovPrev ? deltaHtml(cur, prev, inv) : '';
+  document.getElementById('overview-grid').innerHTML = `
+    <div class="overview-card">
+      <div class="ov-label">Total Revenue</div>
+      <div class="ov-value">${fmt.currency(ov.totalRevenue)}</div>
+      ${d(ov.totalRevenue, ovPrev?.totalRevenue)}
+      <div class="ov-note">All products · ${STATE.days}d</div>
+    </div>
+    <div class="overview-card">
+      <div class="ov-label">Total Orders</div>
+      <div class="ov-value">${fmt.num(ov.totalOrders)}</div>
+      ${d(ov.totalOrders, ovPrev?.totalOrders)}
+      <div class="ov-note">Completed purchases</div>
+    </div>
+    <div class="overview-card">
+      <div class="ov-label">Active Products</div>
+      <div class="ov-value">${ov.active}</div>
+      ${d(ov.active, ovPrev?.active)}
+      <div class="ov-note">Products with revenue &gt; $0</div>
+    </div>
+    <div class="overview-card">
+      <div class="ov-label">CVR (View→Purchase)</div>
+      <div class="ov-value">${fmt.pct(ov.cvr)}</div>
+      ${d(ov.cvr, ovPrev?.cvr)}
+      <div class="ov-note">Total orders ÷ total views</div>
+    </div>
+  `;
+}
+
+function renderPortfolio(ov, ovPrev) {
+  const d = (cur, prev) => ovPrev ? deltaHtml(cur, prev) : '';
+  document.getElementById('portfolio-grid').innerHTML = `
+    <div class="portfolio-card">
+      <div class="pc-icon">💰</div>
+      <div class="pc-label">Average Order Value (AOV)</div>
+      <div class="pc-value">${fmt.currency(ov.aov)}</div>
+      ${d(ov.aov, ovPrev?.aov)}
+      <div class="pc-note">Total revenue ÷ total orders.</div>
+    </div>
+    <div class="portfolio-card">
+      <div class="pc-icon">👤</div>
+      <div class="pc-label">Revenue per User (RPU)</div>
+      <div class="pc-value">${fmt.currency(ov.rpu)}</div>
+      ${d(ov.rpu, ovPrev?.rpu)}
+      <div class="pc-note">Total revenue ÷ total views (visitor proxy).</div>
+    </div>
+    <div class="portfolio-card">
+      <div class="pc-icon">📦</div>
+      <div class="pc-label">Revenue per Product</div>
+      <div class="pc-value">${fmt.currency(ov.rpp)}</div>
+      ${d(ov.rpp, ovPrev?.rpp)}
+      <div class="pc-note">Total revenue ÷ active SKUs.</div>
+    </div>
+  `;
+}
+
+function renderSegments(segs) {
+  const labels   = { TOP:'Top', MID:'Mid', LONG_TAIL:'Long Tail' };
+  const badgeCls = { TOP:'badge-TOP', MID:'badge-MID', LONG_TAIL:'badge-TAIL' };
+  const revCls   = { TOP:'rev-TOP',   MID:'rev-MID',   LONG_TAIL:'rev-TAIL'  };
+  const fillCls  = { TOP:'fill-TOP',  MID:'fill-MID',  LONG_TAIL:'fill-TAIL' };
+  document.getElementById('segments-grid').innerHTML =
+    Object.entries(segs).map(([seg, s]) => `
+      <div class="segment-card">
+        <div class="seg-header">
+          <span class="seg-badge ${badgeCls[seg]}">${labels[seg]}</span>
+          <span class="seg-count">${s.count} product${s.count !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="seg-revenue ${revCls[seg]}">${fmt.currency(s.revenue)}</div>
+        <div class="seg-share">${fmt.pct(s.share)} of total revenue</div>
+        <div class="seg-bar-track"><div class="seg-bar-fill ${fillCls[seg]}" style="width:${(s.share * 100).toFixed(1)}%"></div></div>
+      </div>
+    `).join('');
+}
+
+function renderCategoryBreakdown(cats) {
+  const maxRev = cats[0].revenue;
+  document.getElementById('category-breakdown').innerHTML = `
+    <div class="cb-title">Revenue by Category</div>
+    ${cats.map(c => `
+      <div class="cb-row">
+        <div class="cb-name">${c.name}</div>
+        <div class="cb-track"><div class="cb-fill" style="width:${(c.revenue / maxRev * 100).toFixed(1)}%"></div></div>
+        <div class="cb-rev">${fmt.currency(c.revenue)}</div>
+        <div class="cb-pct">${fmt.pct(c.share)}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ================================================================
+   RENDER — Products Table  (sortable + filterable)
+================================================================ */
+
+const LABEL_NAMES = {
+  SCALE: '🟢 Scale', OPTIMIZE: '🟡 Optimize',
+  LOW_PRIORITY: '🔴 Low Priority', WATCH: '🔵 Watch',
+};
+const LABEL_BADGE = {
+  SCALE: 'badge-SCALE', OPTIMIZE: 'badge-OPTIMIZE',
+  LOW_PRIORITY: 'badge-LOW_PRIORITY', WATCH: 'badge-WATCH',
+};
+
+function setSort(col) {
+  SORT.dir = (SORT.col === col && SORT.dir === 'desc') ? 'asc' : 'desc';
+  SORT.col = col;
+  renderTable(CURRENT_PRODUCTS);
+}
+
+function filterTable(type, val, btn) {
+  TABLE_FILTER[type] = val;
+  document.querySelectorAll(`.ftab-${type}`).forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(CURRENT_PRODUCTS);
+}
+
+function renderTable(products) {
+  CURRENT_PRODUCTS = products;
+
+  // Sort
+  const colMap = {
+    revenue: p => p.revenue, views: p => p.views,
+    rpv: p => p.rpv, cvr: p => p.funnel.v2p,
+    funnelScore: p => p.funnelScore, opportunityScore: p => p.opportunityScore,
+  };
+  const getter = colMap[SORT.col] || colMap.revenue;
+  const sorted = [...products].sort((a, b) =>
+    SORT.dir === 'desc' ? getter(b) - getter(a) : getter(a) - getter(b)
+  );
+
+  // Filter
+  const filtered = sorted.filter(p => {
+    const segOk = TABLE_FILTER.segment === 'ALL' || p.segment === TABLE_FILTER.segment;
+    const lblOk = TABLE_FILTER.label   === 'ALL' || p.label   === TABLE_FILTER.label;
+    return segOk && lblOk;
+  });
+
+  const maxRev = products.length ? Math.max(...products.map(p => p.revenue)) : 1;
+
+  // Top 3 by opportunity score (for 🔥 badge)
+  const top3Opp = new Set(
+    [...products].sort((a,b) => b.opportunityScore - a.opportunityScore)
+      .slice(0, 3).map(p => p.id)
+  );
+
+  // Sort arrow helper
+  const sa = col => {
+    if (SORT.col !== col) return '<span class="sarr">⇅</span>';
+    return `<span class="sarr">${SORT.dir === 'desc' ? '▼' : '▲'}</span>`;
+  };
+  const sc = col => `sortable${SORT.col === col ? ' sort-' + SORT.dir : ''}`;
+
+  const segBadgeCls = { TOP:'badge-TOP', MID:'badge-MID', LONG_TAIL:'badge-TAIL' };
+  const segBadgeLbl = { TOP:'Top', MID:'Mid', LONG_TAIL:'Long Tail' };
+
+  const thead = `<thead><tr>
+    <th style="min-width:150px">Product</th>
+    <th class="center">Category</th>
+    <th class="right ${sc('views')}"    onclick="setSort('views')"    title="Sort by Views">Views ${sa('views')}</th>
+    <th class="right ${sc('revenue')}"  onclick="setSort('revenue')"  title="Sort by Revenue">Revenue ${sa('revenue')}</th>
+    <th class="right ${sc('rpv')}"      onclick="setSort('rpv')"      title="Revenue per View = Revenue ÷ Views">RPV ${sa('rpv')}</th>
+    <th class="right ${sc('cvr')}"      onclick="setSort('cvr')"      title="View-to-Purchase conversion rate">CVR ${sa('cvr')}</th>
+    <th class="${sc('funnelScore')}"     onclick="setSort('funnelScore')" title="Funnel Score = (V→Cart × 0.4) + (Cart→Buy × 0.6) × 100">Funnel ${sa('funnelScore')}</th>
+    <th class="right ${sc('opportunityScore')}" onclick="setSort('opportunityScore')" title="Opportunity Score = Views × (1 − CVR) × AOV">Opp. Score ${sa('opportunityScore')}</th>
+    <th class="center" title="Auto-assigned decision label based on RPV + CVR thresholds">Decision</th>
+    <th class="center">Segment</th>
+  </tr></thead>`;
+
+  const emptyRow = `<tbody><tr><td colspan="10" style="padding:2rem;text-align:center;color:var(--clr-muted);font-size:.82rem">No products match the current filter.</td></tr></tbody>`;
+
+  const tbody = filtered.length === 0 ? emptyRow : `<tbody>${filtered.map(p => {
+    const fsCls    = p.funnelScore >= THRESHOLDS.FSCORE_GOOD ? 'fscore-good' : p.funnelScore >= THRESHOLDS.FSCORE_WARN ? 'fscore-warn' : 'fscore-bad';
+    const fsValCls = p.funnelScore >= THRESHOLDS.FSCORE_GOOD ? 'fval-good'   : p.funnelScore >= THRESHOLDS.FSCORE_WARN ? 'fval-warn'   : 'fval-bad';
+    const cvrCls   = rateClass(p.funnel.v2p, THRESHOLDS.CVR_GOOD, THRESHOLDS.CVR_WARN);
+    const isTopOpp = top3Opp.has(p.id);
+    const fsTitle  = `Funnel Score: (V→Cart ${fmt.pct(p.funnel.v2c)} × 0.4) + (Cart→Buy ${fmt.pct(p.funnel.c2p)} × 0.6) = ${p.funnelScore}/100`;
+    return `
+      <tr>
+        <td><div class="prod-name">${p.name}</div><div class="prod-id">${p.id}</div></td>
+        <td class="center"><span class="cat-pill">${p.category}</span></td>
+        <td class="right">${fmt.num(p.views)}</td>
+        <td class="right">
+          <div class="revenue-bar">
+            <div class="rev-bar-track"><div class="rev-bar-fill" style="width:${(p.revenue / maxRev * 100).toFixed(1)}%"></div></div>
+            ${fmt.currency(p.revenue)}
+          </div>
+        </td>
+        <td class="right"><span class="${p.rpvClass}">${fmt.rpv(p.rpv)}</span></td>
+        <td class="right"><span class="${cvrCls}">${fmt.pct(p.funnel.v2p)}</span></td>
+        <td>
+          <div class="fscore-wrap" title="${fsTitle}">
+            <div class="fscore-top">
+              <span class="fscore-val ${fsValCls}">${p.funnelScore}</span>
+              <span class="fscore-denom">/100</span>
+            </div>
+            <div class="fscore-track"><div class="fscore-fill ${fsCls}" style="width:${p.funnelScore}%"></div></div>
+          </div>
+        </td>
+        <td class="right opp-cell${isTopOpp ? ' is-top' : ''}">${isTopOpp ? '🔥 ' : ''}${fmt.compact(p.opportunityScore)}</td>
+        <td class="center">
+          <span class="seg-pill ${LABEL_BADGE[p.label]}" title="${p.labelTooltip}">${LABEL_NAMES[p.label]}</span>
+        </td>
+        <td class="center">
+          <span class="seg-pill ${segBadgeCls[p.segment]}">${segBadgeLbl[p.segment]}</span>
+        </td>
+      </tr>`;
+  }).join('')}</tbody>`;
+
+  document.getElementById('products-table').innerHTML = thead + tbody;
+}
+
+/* ================================================================
+   RENDER — Top Opportunities
+================================================================ */
+function renderTopOpportunities(products) {
+  const top8 = [...products]
+    .sort((a, b) => b.opportunityScore - a.opportunityScore)
+    .slice(0, 8);
+
+  document.getElementById('opp-list').innerHTML = top8.map((p, i) => {
+    const isFire   = i < 3;
+    const cvrCls   = rateClass(p.funnel.v2p, THRESHOLDS.CVR_GOOD, THRESHOLDS.CVR_WARN);
+    return `
+      <div class="opps-row">
+        <div class="opps-rank ${isFire ? 'fire' : 'rest'}">${i + 1}</div>
+        <div>
+          <div class="opps-name">${p.name}</div>
+          <div class="opps-cat">${p.category} · ${p.id}</div>
+        </div>
+        <span class="opps-num">${fmt.num(p.views)}</span>
+        <span class="opps-num"><span class="${cvrCls}">${fmt.pct(p.funnel.v2p)}</span></span>
+        <span class="opps-num">${fmt.currency(p.productAOV)}</span>
+        <span class="opps-num ${p.rpvClass}">${fmt.rpv(p.rpv)}</span>
+        <span><span class="seg-pill ${LABEL_BADGE[p.label]}" title="${p.labelTooltip}">${LABEL_NAMES[p.label]}</span></span>
+        <span class="opps-score ${isFire ? 'fire' : 'rest'}">${isFire ? '🔥 ' : ''}${fmt.compact(p.opportunityScore)}</span>
+      </div>`;
+  }).join('');
+}
+
+/* ================================================================
+   RENDER — Funnel Analysis
+================================================================ */
+function renderFunnelAnalysis(products) {
+  const abandoned = products
+    .filter(p => p.carts >= THRESHOLDS.ABANDONMENT_CARTS_MIN && p.funnel.c2p < THRESHOLDS.ABANDONMENT_C2P_MAX)
+    .sort((a, b) => b.carts - a.carts);
+
+  const lostRevEst = p => {
+    const lost = Math.max(0, Math.round(p.carts * THRESHOLDS.GOOD_C2P) - p.orders);
+    return lost * p.price;
+  };
+
+  document.getElementById('abandonment-list').innerHTML = abandoned.length
+    ? abandoned.map(p => `
+        <div class="funnel-product-row">
+          <div><div class="fp-prod-name">${p.name}</div><div class="fp-prod-cat">${p.category}</div></div>
+          <div class="fp-metric"><div class="fp-metric-val rate-warn">${fmt.num(p.carts)}</div><div class="fp-metric-lbl">adds</div></div>
+          <div class="fp-metric"><div class="fp-metric-val rate-bad">${fmt.pct(p.funnel.c2p)}</div><div class="fp-metric-lbl">conv.</div></div>
+          <div class="fp-metric"><div class="fp-metric-val rate-bad">${fmt.currency(lostRevEst(p))}</div><div class="fp-metric-lbl">est. lost</div></div>
+        </div>`).join('')
+    : '<div style="padding:1.5rem;font-size:.82rem;color:var(--clr-muted)">No high-abandonment products detected.</div>';
+
+  const performers = products
+    .filter(p => p.funnel.v2c >= THRESHOLDS.TOP_PERF_V2C_MIN && p.funnel.c2p >= THRESHOLDS.TOP_PERF_C2P_MIN)
+    .sort((a, b) => b.revenue - a.revenue);
+
+  document.getElementById('top-performers-list').innerHTML = performers.length
+    ? performers.map(p => `
+        <div class="funnel-product-row">
+          <div><div class="fp-prod-name">${p.name}</div><div class="fp-prod-cat">${p.category}</div></div>
+          <div class="fp-metric"><div class="fp-metric-val">${fmt.num(p.views)}</div><div class="fp-metric-lbl">views</div></div>
+          <div class="fp-metric"><div class="fp-metric-val rate-good">${fmt.pct(p.funnel.v2p)}</div><div class="fp-metric-lbl">CVR</div></div>
+          <div class="fp-metric"><div class="fp-metric-val rate-good">${fmt.currency(p.revenue)}</div><div class="fp-metric-lbl">revenue</div></div>
+        </div>`).join('')
+    : '<div style="padding:1.5rem;font-size:.82rem;color:var(--clr-muted)">No top performers matched threshold.</div>';
+}
+
+/* ================================================================
+   RENDER — Revenue Trends
+================================================================ */
+function renderRevenueTrends(products, prevProducts) {
+  const noCompare = `<div class="trend-no-compare">Select <strong>Previous period</strong> or <strong>YoY</strong> comparison above to view trends.</div>`;
+  if (!prevProducts || STATE.compareMode === 'none') {
+    document.getElementById('trend-decline-list').innerHTML = noCompare;
+    document.getElementById('trend-growth-list').innerHTML  = noCompare;
+    return;
+  }
+
+  const prevMap = {};
+  prevProducts.forEach(p => { prevMap[p.id] = p.revenue; });
+
+  const withChange = products.map(p => {
+    const prev = prevMap[p.id] || 0;
+    const pct  = prev > 0 ? ((p.revenue - prev) / prev) * 100 : 0;
+    return { ...p, prevRevenue: prev, changePct: pct };
+  });
+
+  const declining = [...withChange].filter(p => p.changePct < 0).sort((a,b) => a.changePct - b.changePct).slice(0, 10);
+  const growing   = [...withChange].filter(p => p.changePct > 0).sort((a,b) => b.changePct - a.changePct).slice(0, 10);
+  const cmpLabel  = STATE.compareMode === 'yoy' ? 'YoY' : 'vs prev';
+
+  function trendRows(list, type) {
+    if (!list.length) return `<div class="trend-no-compare">No ${type} products found for this period.</div>`;
+    return list.map((p, i) => `
+      <div class="trend-row">
+        <span class="tr-rank">${i + 1}</span>
+        <div><div class="tr-name">${p.name}</div><div class="tr-cat">${p.category} · ${p.id}</div></div>
+        <span class="tr-rev">${fmt.currency(p.revenue)}</span>
+        <span class="tr-prev">${fmt.currency(p.prevRevenue)}</span>
+        <span class="tr-badge ${type}">
+          ${type === 'decline' ? '▼' : '▲'} ${Math.abs(p.changePct).toFixed(1)}%
+          <span style="font-weight:400;opacity:.65;font-size:.62rem">${cmpLabel}</span>
+        </span>
+      </div>`).join('');
+  }
+
+  document.getElementById('trend-decline-list').innerHTML = trendRows(declining, 'decline');
+  document.getElementById('trend-growth-list').innerHTML  = trendRows(growing,  'growth');
+}
+
+/* ================================================================
+   RENDER — Advanced Metrics
+================================================================ */
+function renderAdvanced(ov) {
+  document.getElementById('advanced-cards').innerHTML = `
+    <div class="adv-card">
+      <div class="adv-label">Items per Order</div>
+      <div class="adv-value">${fmt.dec(ov.ipo)}</div>
+      <div class="adv-note">Total units sold ÷ total orders.<br>Higher = customers buy more per transaction.</div>
+      <div class="adv-formula">= ${fmt.num(ov.totalUnits)} units ÷ ${fmt.num(ov.totalOrders)} orders</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-label">Customer LTV (estimated)</div>
+      <div class="adv-value">${fmt.currency(ov.ltv)}</div>
+      <div class="adv-note">AOV × ${LTV_CONFIG.purchasesPerYear}x/year × ${LTV_CONFIG.lifespanYears}yr lifespan.<br>Configure multipliers in LTV_CONFIG.</div>
+      <div class="adv-formula">= ${fmt.currency(ov.aov)} × ${LTV_CONFIG.purchasesPerYear} × ${LTV_CONFIG.lifespanYears}</div>
+    </div>
+    <div class="adv-card">
+      <div class="adv-label">Revenue per Product (avg)</div>
+      <div class="adv-value">${fmt.currency(ov.rpp)}</div>
+      <div class="adv-note">Average revenue per active SKU in the portfolio.</div>
+      <div class="adv-formula">= ${fmt.currency(ov.totalRevenue)} ÷ ${ov.active} active SKUs</div>
+    </div>
+  `;
+}
+
+/* ================================================================
+   ORCHESTRATOR
+================================================================ */
+function refresh() {
+  const scaled = scaleProducts(STATE.days);
+  let   products = enrich(scaled);
+  products = addDecisionLabels(products);   // adds label, rpvClass, labelTooltip
+
+  const ov   = overview(products);
+  const segs = segments(products);
+  const cats = categoryRevenue(products);
+
+  let ovPrev = null, prevProducts = null;
+  if (STATE.compareMode !== 'none') {
+    const prevDays   = STATE.compareMode === 'yoy' ? 365 : STATE.days;
+    const prevScaled = simulatePrevProducts(scaleProducts(prevDays));
+    prevProducts     = addDecisionLabels(enrich(prevScaled));
+    ovPrev           = overview(prevProducts);
+  }
+
+  renderOverview(ov, ovPrev);
+  renderPortfolio(ov, ovPrev);
+  renderSegments(segs);
+  renderCategoryBreakdown(cats);
+  renderTable(products);
+  renderTopOpportunities(products);
+  renderFunnelAnalysis(products);
+  renderRevenueTrends(products, prevProducts);
+  renderAdvanced(ov);
+
+  const now  = STATE.to   || new Date();
+  const from = STATE.from || new Date(now - STATE.days * 86400000);
+  document.getElementById('report-sub').textContent =
+    `${from.toISOString().split('T')[0]}  →  ${now.toISOString().split('T')[0]}  ·  Property: ${GA4_CONFIG.propertyId}`;
+  document.getElementById('footer-meta').textContent =
+    `Generated ${new Date().toLocaleString()}  ·  ${products.length} SKUs  ·  ${STATE.days}d window`;
+
+  window.__report = {
+    meta: { generated_at: new Date().toISOString(), range: { from, to: now }, days: STATE.days, compare: STATE.compareMode, property_id: GA4_CONFIG.propertyId },
+    overview: ov, products, segments: segs, categories: cats,
+  };
+}
+
+function run() {
+  const now = new Date(), from = new Date(now - 90 * 86400000);
+  updateDateBarDisplay(90, from, now, 'Last 90 days');
+  refresh();
+  setTimeout(() => document.getElementById('loading').classList.add('hide'), 700);
+}
+
+document.addEventListener('DOMContentLoaded', () => setTimeout(run, 800));
+</script>
+</body>
+</html>

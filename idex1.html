@@ -128,6 +128,9 @@
       max-width: 1000px;
       margin: 0 auto;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       /* Animace – obsah se při načtení plynule objeví */
       animation: fadeUp 0.9s ease both;
     }
@@ -155,7 +158,7 @@
 
     h1 {
       font-family: var(--font-display);
-      font-size: clamp(1.4rem, 3vw, 2.6rem); /* fluid typography */
+      font-size: clamp(2.2rem, 5vw, 4.2rem); /* fluid typography */
       font-weight: 300;
       line-height: 1.08;
       letter-spacing: -0.01em;
@@ -172,9 +175,10 @@
       font-size: 1.05rem;
       color: var(--clr-muted);
       max-width: 540px;
-      margin-bottom: 2.8rem;
+      margin: 0 auto 2.8rem;
       font-weight: 300;
       line-height: 1.8;
+      text-align: center;
     }
 
     /* ═══════════════════════════════════════════════
@@ -189,7 +193,7 @@
 
     .btn {
       display: block;
-      margin: 0 auto;
+      margin: 2rem auto 0;
       max-width: fit-content;
       align-items: center;
       gap: 0.5rem;
@@ -453,43 +457,155 @@
       text-transform: uppercase;
     }
 
-    /* Upload možnosti */
-    .upload-options {
-      display: flex;
+    /* Třísloupkový hero layout */
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr;
       gap: 2rem;
-      align-items: flex-start;
-      justify-content: center;
-      margin-bottom: 2rem;
+      align-items: center;
+      width: 100%;
     }
 
-    .sheets-zone .input-row {
+    .hero-center {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
-      margin-top: auto;
+      text-align: center;
     }
 
-    .sheets-zone label {
-      font-size: 0.92rem;
+    /* GA4 propojení */
+    .ga4-connect {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 0 auto 2rem;
+      width: 100%;
+    }
+
+    .ga4-box {
+      width: 380px;
+      height: 380px;
+      flex-shrink: 0;
+      border: 1.5px dashed var(--clr-border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      transition: all var(--transition);
+      background: var(--clr-surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ga4-box:hover {
+      border-color: var(--clr-accent);
+      background: rgba(255,73,33,0.04);
+    }
+
+    .ga4-logo {
+      font-size: 2rem;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .ga4-title {
+      font-size: 0.95rem;
       font-weight: 500;
+      margin-bottom: 0.3rem;
       color: var(--clr-text);
+    }
+
+    .ga4-hint {
+      font-size: 0.78rem;
+      color: var(--clr-muted);
+      margin-bottom: 1.4rem;
+    }
+
+    .ga4-input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+
+    .ga4-input-row input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      background: var(--clr-bg);
+      color: var(--clr-text);
+      font-size: 0.88rem;
+      letter-spacing: 0.02em;
+    }
+
+    .ga4-input-row input::placeholder {
+      color: var(--clr-muted);
+      opacity: 0.6;
+    }
+
+    .ga4-input-row input:focus {
+      outline: none;
+      border-color: var(--clr-accent);
+    }
+
+    .btn-ga4 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.3rem;
+      border-radius: var(--radius);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--clr-accent);
+      background: transparent;
+      color: var(--clr-accent);
+      transition: all var(--transition);
       white-space: nowrap;
     }
 
-    .sheets-zone input {
-      flex: 1;
-      padding: 0.75rem;
-      border: 1px solid var(--clr-border);
-      border-radius: var(--radius);
-      background: var(--clr-surface);
-      color: var(--clr-text);
-      font-size: 0.88rem;
+    .btn-ga4:hover {
+      background: var(--clr-accent);
+      color: #0b0f1a;
     }
 
-    .sheets-zone input:focus {
-      outline: none;
-      border-color: var(--clr-accent);
+    .ga4-or {
+      font-size: 0.78rem;
+      color: var(--clr-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--clr-border);
+      background: #fff;
+      color: #3c4043;
+      transition: all var(--transition);
+    }
+
+    .btn-google:hover {
+      border-color: #aaa;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-google img {
+      width: 18px;
+      height: 18px;
     }
 
     /* ═══════════════════════════════════════════════
@@ -572,41 +688,36 @@
   <section class="hero">
     <div class="hero-content">
       <h1>Product <em>Portfolio</em> Analysis</h1>
-
       <p class="hero-desc">
         Gain a comprehensive view of your product ecosystem. Identify gaps,
         evaluate performance, and make data-driven decisions to drive
-        sustainable growth.
+        sustainable growth. Make your clients product portfolio rain.
       </p>
 
-      <!-- Upload možnosti -->
-      <div class="upload-options">
-        <!-- Upload z počítače -->
-        <div class="upload-zone" id="upload-zone" onclick="handleFileUpload()">
-          <span class="upload-icon">📁</span>
-          <p class="upload-title">Nahrát soubor z počítače</p>
-          <p class="upload-hint">Klikněte nebo přetáhněte soubor</p>
-          <div class="file-tags">
-            <span class="file-tag">CSV</span>
-            <span class="file-tag">XLSX</span>
-            <span class="file-tag">JSON</span>
+      <!-- Dvě možnosti propojení vedle sebe -->
+      <div class="ga4-connect">
+        <!-- Možnost 1: Property ID -->
+        <div class="ga4-box">
+          <span class="ga4-logo">📈</span>
+          <p class="ga4-title">Connect via Property ID</p>
+          <p class="ga4-hint">Enter your GA4 Property ID manually</p>
+          <div class="ga4-input-row">
+            <input type="text" id="ga4-property-id" placeholder="Property ID (e.g. 123456789)">
+            <button class="btn-ga4" onclick="handleGA4Connect()">Connect</button>
           </div>
         </div>
 
-        <!-- Vložit z Google Sheets -->
-        <div class="upload-zone sheets-zone">
-          <span class="upload-icon">📊</span>
-          <div class="input-row">
-            <label for="sheets-url">Vložit odkaz</label>
-            <p class="upload-hint">Klikněte pro vložení odkazu</p>
-            <input type="text" id="sheets-url" placeholder="https://docs.google.com/spreadsheets/d/...">
-          </div>
+        <!-- Možnost 2: Google přihlášení -->
+        <div class="ga4-box" style="cursor:pointer;">
+          <span class="ga4-logo">🔐</span>
+          <p class="ga4-title">Sign in with Google</p>
+          <p class="ga4-hint">Authorize access to your GA4 account via Google</p>
+          <button class="btn-google" onclick="handleGoogleAuth()">
+            <img src="https://www.google.com/favicon.ico" alt="Google">
+            Sign in with Google
+          </button>
         </div>
       </div>
-
-      <p class="hero-desc" style="margin-bottom: 1rem; font-size: 0.9rem;">
-        Vložte soubor dat obsahující ID produktů a jejich tržby, případně název a kategorii.
-      </p>
 
       <!-- Tlačítko spustit analýzu -->
       <button class="btn btn-primary" id="btn-start" onclick="handleStart()">
@@ -627,8 +738,17 @@
        – handleStart() → spustí analýzu
     ═══════════════════════════════════════════════ */
 
-    function handleFileUpload() {
-      alert('📂 File picker bude otevřen zde – připravujeme upload funkcionalitu!');
+    function handleGA4Connect() {
+      const id = document.getElementById('ga4-property-id').value.trim();
+      if (!id) {
+        alert('Zadejte prosím GA4 Property ID.');
+        return;
+      }
+      alert('🔗 Připojování k GA4 Property: ' + id + ' – implementace brzy!');
+    }
+
+    function handleGoogleAuth() {
+      alert('🔐 Google OAuth přihlášení – implementace brzy!');
     }
 
     function handleStart() {
