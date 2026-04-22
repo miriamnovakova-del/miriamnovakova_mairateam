@@ -668,6 +668,57 @@
        Na mobilech upravujeme padding a skryjeme
        některé navigační prvky.
     ═══════════════════════════════════════════════ */
+    /* ─── CONNECTION STATUS ────────────────────── */
+    .conn-status {
+      max-width: 780px;
+      margin: 0 auto 1.4rem;
+      border-radius: 6px;
+      overflow: hidden;
+      display: none;
+      animation: fadeUp .35s ease both;
+    }
+    .conn-status.visible { display: block; }
+
+    .conn-status-bar {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .9rem 1.25rem;
+      font-size: .84rem; line-height: 1.5;
+    }
+    .conn-status.status-error  .conn-status-bar { background: rgba(231,76,60,.16);  border: 1px solid rgba(231,76,60,.35); }
+    .conn-status.status-warn   .conn-status-bar { background: rgba(243,156,18,.14); border: 1px solid rgba(243,156,18,.3); }
+    .conn-status.status-ok     .conn-status-bar { background: rgba(46,204,113,.13); border: 1px solid rgba(46,204,113,.3); }
+    .conn-status.status-info   .conn-status-bar { background: rgba(74,159,212,.12); border: 1px solid rgba(74,159,212,.28); }
+
+    .conn-icon { font-size: 1.1rem; flex-shrink:0; margin-top:.05rem; }
+    .conn-body  { flex: 1; }
+    .conn-title { font-weight: 600; margin-bottom: .2rem; }
+    .conn-status.status-error  .conn-title { color: #e74c3c; }
+    .conn-status.status-warn   .conn-title { color: #f39c12; }
+    .conn-status.status-ok     .conn-title { color: #2ecc71; }
+    .conn-status.status-info   .conn-title { color: #4a9fd4; }
+    .conn-desc  { font-size: .79rem; color: #9abfb0; }
+    .conn-desc code { font-family: monospace; font-size:.76rem; background: rgba(255,255,255,.08); padding:.1rem .35rem; border-radius:3px; }
+    .conn-fix   { margin-top: .45rem; font-size: .76rem; color: #7aad9a; }
+    .conn-fix strong { color: #a8cfc0; }
+
+    .conn-loading {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .85rem 1.25rem;
+      background: rgba(74,159,212,.1); border: 1px solid rgba(74,159,212,.25);
+      font-size: .82rem; color: #4a9fd4; border-radius: 6px;
+    }
+    .conn-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(74,159,212,.25);
+      border-top-color: #4a9fd4;
+      border-radius: 50%; animation: spin .7s linear infinite; flex-shrink:0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* highlight input on error */
+    .ga4-input-row input.input-error { border-color: #e74c3c !important; }
+    .ga4-input-row input.input-ok    { border-color: #2ecc71 !important; }
+
     @media (max-width: 768px) {
       nav { padding: 1rem 1.5rem; }
       .nav-links { display: none; }
@@ -719,6 +770,9 @@
         </div>
       </div>
 
+      <!-- Connection status / error area -->
+      <div class="conn-status" id="conn-status"></div>
+
       <!-- Tlačítko spustit analýzu -->
       <button class="btn btn-primary" id="btn-start" onclick="handleStart()">
         Spustit analýzu
@@ -729,31 +783,166 @@
 
 
   <script>
-    /* ═══════════════════════════════════════════════
-       JAVASCRIPT – handlery
+  /* ═══════════════════════════════════════════════
+     CONNECTION STATE
+  ═══════════════════════════════════════════════ */
+  const CONN = {
+    method:     null,   // 'property_id' | 'google'
+    propertyId: null,
+    ready:      false,
+  };
 
-       Zatím pouze zobrazují alert jako placeholder.
-       Sem budeš v budoucnu přidávat skutečnou logiku:
-       – handleFileUpload() → otevře file picker
-       – handleStart() → spustí analýzu
-    ═══════════════════════════════════════════════ */
+  /* ─── UI helpers ─────────────────────────────── */
+  function showStatus(type, icon, title, desc, fix) {
+    // type: 'error' | 'warn' | 'ok' | 'info'
+    const el = document.getElementById('conn-status');
+    el.className = `conn-status visible status-${type}`;
+    el.innerHTML = `
+      <div class="conn-status-bar">
+        <span class="conn-icon">${icon}</span>
+        <div class="conn-body">
+          <div class="conn-title">${title}</div>
+          ${desc ? `<div class="conn-desc">${desc}</div>` : ''}
+          ${fix  ? `<div class="conn-fix">${fix}</div>`   : ''}
+        </div>
+      </div>`;
+  }
 
-    function handleGA4Connect() {
-      const id = document.getElementById('ga4-property-id').value.trim();
-      if (!id) {
-        alert('Zadejte prosím GA4 Property ID.');
-        return;
+  function showLoading(msg) {
+    const el = document.getElementById('conn-status');
+    el.className = 'conn-status visible';
+    el.innerHTML = `<div class="conn-loading"><div class="conn-spinner"></div>${msg}</div>`;
+  }
+
+  function clearStatus() {
+    const el = document.getElementById('conn-status');
+    el.className = 'conn-status';
+    el.innerHTML = '';
+  }
+
+  function setInputState(cls) {
+    const inp = document.getElementById('ga4-property-id');
+    inp.classList.remove('input-error','input-ok');
+    if (cls) inp.classList.add(cls);
+  }
+
+  /* ─── Validation ─────────────────────────────── */
+  // GA4 Property IDs are purely numeric, 6–12 digits
+  function validatePropertyId(id) {
+    if (!id)                    return { ok: false, code: 'EMPTY',          msg: 'Property ID is required.' };
+    if (id.startsWith('G-'))    return { ok: false, code: 'WRONG_ID_TYPE',  msg: 'This looks like a Measurement ID (<code>G-XXXXXXXX</code>), not a Property ID. Property IDs are numeric — find yours in GA4 → Admin → Property Settings.' };
+    if (id.startsWith('UA-'))   return { ok: false, code: 'UNIVERSAL_GA',   msg: 'This is a Universal Analytics ID (<code>UA-XXXXXXXX</code>). This tool requires GA4. Migrate your property at <strong>analytics.google.com</strong>.' };
+    if (!/^\d+$/.test(id))      return { ok: false, code: 'INVALID_FORMAT', msg: `"${id}" is not a valid format. Property ID must contain only digits (e.g. <code>314159265</code>).` };
+    if (id.length < 6)          return { ok: false, code: 'TOO_SHORT',       msg: 'Property ID is too short — GA4 Property IDs are typically 9 digits.' };
+    if (id.length > 12)         return { ok: false, code: 'TOO_LONG',        msg: 'Property ID is too long — GA4 Property IDs are typically 9 digits.' };
+    return { ok: true };
+  }
+
+  /* ─── Handlers ───────────────────────────────── */
+  function handleGA4Connect() {
+    const raw = document.getElementById('ga4-property-id').value.trim();
+    const v   = validatePropertyId(raw);
+
+    if (!v.ok) {
+      setInputState('input-error');
+      const fixMap = {
+        EMPTY:          '<strong>How to find it:</strong> GA4 → Admin (gear icon) → Property column → Property Settings → Property ID',
+        WRONG_ID_TYPE:  '<strong>Where to find Property ID:</strong> GA4 → Admin → Property Settings → look for the number-only ID (not the Measurement ID)',
+        UNIVERSAL_GA:   '<strong>Tip:</strong> Create a GA4 property at analytics.google.com/analytics/web → Admin → Create Property',
+        INVALID_FORMAT: '<strong>Example:</strong> <code>314159265</code> — digits only, no letters or dashes',
+        TOO_SHORT:      '<strong>Example:</strong> <code>314159265</code> (9 digits)',
+        TOO_LONG:       '<strong>Check:</strong> You may have copied extra characters — the ID should be 6–12 digits',
+      };
+      showStatus('error', '❌', 'Invalid Property ID', v.msg, fixMap[v.code] || '');
+      return;
+    }
+
+    // Simulate async connection attempt
+    clearStatus();
+    setInputState(null);
+    showLoading(`Connecting to GA4 Property ${raw}…`);
+
+    setTimeout(() => {
+      // In production: real API call here.
+      // For demo: treat any valid-format ID as "connected in demo mode"
+      setInputState('input-ok');
+      CONN.method     = 'property_id';
+      CONN.propertyId = raw;
+      CONN.ready      = true;
+
+      showStatus(
+        'ok', '✅',
+        `Property ${raw} — Connected (demo mode)`,
+        'Your Property ID has been accepted. The report will run on built-in sample data until the live GA4 Data API integration is configured.',
+        '<strong>Next step:</strong> Click <em>Spustit analýzu</em> to open the report.'
+      );
+    }, 1400);
+  }
+
+  function handleGoogleAuth() {
+    showLoading('Opening Google OAuth…');
+
+    setTimeout(() => {
+      // Simulate the most common real-world OAuth errors so the user
+      // understands what to fix when wiring up the real integration.
+      const simulatedError = 'redirect_uri_mismatch'; // change to test other flows
+
+      if (simulatedError === 'redirect_uri_mismatch') {
+        showStatus(
+          'error', '🔐',
+          'Google OAuth Error: redirect_uri_mismatch',
+          'The redirect URI of this page is not registered in your Google Cloud Console project.',
+          `<strong>How to fix:</strong><br>
+           1. Open <strong>console.cloud.google.com</strong> → APIs & Services → Credentials<br>
+           2. Edit your OAuth 2.0 Client ID<br>
+           3. Under <em>Authorised redirect URIs</em> add: <code>${window.location.origin}/idex1.html</code><br>
+           4. Save and wait ~5 minutes for changes to propagate`
+        );
+      } else if (simulatedError === 'access_denied') {
+        showStatus('error', '🔐', 'Access Denied',
+          'The Google account did not grant access to GA4 Analytics data.',
+          '<strong>Fix:</strong> Sign in again and check the <em>"See and download your Google Analytics data"</em> permission when prompted.');
+      } else if (simulatedError === 'invalid_client') {
+        showStatus('error', '🔐', 'OAuth Error: invalid_client',
+          'The OAuth Client ID is missing or invalid.',
+          '<strong>Fix:</strong> Set the correct <code>CLIENT_ID</code> in the app configuration. Create one at Google Cloud Console → APIs & Services → Credentials.');
+      } else {
+        // Success path
+        CONN.method     = 'google';
+        CONN.propertyId = 'AUTO';
+        CONN.ready      = true;
+        showStatus('ok', '✅', 'Signed in with Google',
+          'GA4 account access granted. Your properties will be loaded when you start the analysis.',
+          '<strong>Next step:</strong> Click <em>Spustit analýzu</em>.');
       }
-      alert('🔗 Připojování k GA4 Property: ' + id + ' – implementace brzy!');
+    }, 1600);
+  }
+
+  function handleStart() {
+    if (!CONN.ready) {
+      showStatus(
+        'warn', '⚠️',
+        'No GA4 connection established',
+        'Please connect your GA4 property before running the analysis.',
+        '<strong>Option A:</strong> Enter your Property ID and click Connect<br><strong>Option B:</strong> Sign in with Google'
+      );
+      // Shake the boxes to draw attention
+      document.querySelectorAll('.ga4-box').forEach(b => {
+        b.style.transition = 'border-color .15s ease';
+        b.style.borderColor = '#e74c3c';
+        setTimeout(() => { b.style.borderColor = ''; }, 1200);
+      });
+      return;
     }
 
-    function handleGoogleAuth() {
-      alert('🔐 Google OAuth přihlášení – implementace brzy!');
-    }
-
-    function handleStart() {
-      alert('🚀 Analýza bude spuštěna zde – zatím pracujeme na implementaci!');
-    }
+    showLoading('Preparing report…');
+    setTimeout(() => {
+      // Pass property ID to analytics page via sessionStorage
+      sessionStorage.setItem('ga4_property', CONN.propertyId || 'DEMO');
+      sessionStorage.setItem('ga4_method',   CONN.method     || 'demo');
+      window.location.href = 'analytics.html';
+    }, 800);
+  }
   </script>
 
 </body>

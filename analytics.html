@@ -55,6 +55,137 @@
     .nav-meta  { font-size: .75rem; color: var(--clr-muted); letter-spacing:.08em; text-transform:uppercase; }
     .nav-back  { font-size:.78rem; color:var(--clr-muted); text-decoration:none; border:1px solid var(--clr-border); padding:.35rem .85rem; border-radius:var(--radius); transition:all var(--transition); letter-spacing:.05em; }
     .nav-back:hover { color:var(--clr-accent); border-color:var(--clr-accent); }
+    .nav-right { display:flex; align-items:center; gap:.65rem; }
+    .btn-pdf {
+      font-size:.74rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+      padding:.38rem 1rem; border-radius:var(--radius);
+      border:1px solid var(--clr-accent); background:var(--clr-accent);
+      color:#fff; cursor:pointer; transition:all var(--transition); white-space:nowrap;
+      display:flex; align-items:center; gap:.4rem;
+    }
+    .btn-pdf:hover { background:var(--clr-accent-lt); border-color:var(--clr-accent-lt); }
+
+    /* ── PRINT / PDF STYLES ──────────────────────── */
+    @media print {
+      @page { size: A4 portrait; margin: 12mm 14mm; }
+
+      /* hide interactive chrome */
+      #loading, nav, .date-bar, .btn-pdf,
+      .filter-groups, .table-toolbar .filter-groups,
+      footer .api-badge { display: none !important; }
+
+      body {
+        background: #fff !important;
+        color: #1a1a1a !important;
+        font-size: 10pt;
+        background-image: none !important;
+      }
+
+      main { padding: 0 !important; max-width: 100% !important; }
+
+      /* Section labels */
+      .section-label { color: #c0392b !important; border-bottom:1px solid #eee; padding-bottom:3px; margin-bottom:8px; }
+      .section-gap { margin-top: 14pt !important; }
+      .page-header { margin-bottom: 12pt; }
+      .page-title em { color: #c0392b !important; }
+      .page-sub { color: #666 !important; }
+
+      /* Cards */
+      .overview-grid, .portfolio-grid, .segments-grid, .advanced-top {
+        background: #fff !important;
+        border: 1px solid #ddd !important;
+      }
+      .overview-card, .portfolio-card, .segment-card, .adv-card {
+        background: #fff !important;
+        border-right: 1px solid #ddd !important;
+        color: #1a1a1a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .ov-label, .pc-label, .adv-label, .seg-share, .ov-note, .pc-note, .adv-note { color: #555 !important; }
+      .ov-value, .pc-value, .adv-value, .seg-revenue { color: #c0392b !important; }
+
+      /* Delta badges */
+      .delta-up   { background: #e8f8ef !important; color: #27ae60 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .delta-down { background: #fde8e6 !important; color: #c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+      /* Table */
+      .table-wrap { border: 1px solid #ddd !important; background:#fff !important; }
+      thead tr    { background: #f5f5f5 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      th          { color: #555 !important; }
+      td, tbody tr { border-color: #eee !important; color: #1a1a1a !important; }
+      tbody tr:hover { background: none !important; }
+      .cat-pill { background:#eee !important; color:#555 !important; border-color:#ccc !important; }
+      .badge-TOP  { background:#fde8e6 !important; color:#c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .badge-MID  { background:#fef5e0 !important; color:#d68910 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .badge-TAIL { background:#eaf4fb !important; color:#2980b9 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .rate-good { color: #27ae60 !important; }
+      .rate-warn { color: #d68910 !important; }
+      .rate-bad  { color: #c0392b !important; }
+      .rpv-q4 { color: #27ae60 !important; }
+      .rpv-q3 { color: #82c7a0 !important; }
+      .rpv-q2 { color: #d68910 !important; }
+      .rpv-q1 { color: #c0392b !important; }
+
+      /* Funnel score bars */
+      .fscore-track { background: #eee !important; }
+      .fscore-fill  { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .fscore-good  { background: #27ae60 !important; }
+      .fscore-warn  { background: #d68910 !important; }
+      .fscore-bad   { background: #c0392b !important; }
+      .fval-good { color: #27ae60 !important; }
+      .fval-warn { color: #d68910 !important; }
+      .fval-bad  { color: #c0392b !important; }
+
+      /* Category breakdown */
+      .category-breakdown { background:#fff !important; border:1px solid #ddd !important; }
+      .cb-fill  { background:#c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .cb-track { background:#eee !important; }
+      .cb-name, .cb-rev { color:#1a1a1a !important; }
+      .cb-pct { color:#666 !important; }
+
+      /* Funnel panels */
+      .funnel-panel, .trend-panel, .opps-panel, .adv-card { background:#fff !important; border:1px solid #ddd !important; }
+      .funnel-panel-header, .trend-panel-header, .opps-panel-header { background:#f9f9f9 !important; border-color:#ddd !important; }
+      .trend-panel-header.decline { border-left:3px solid #c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .trend-panel-header.growth  { border-left:3px solid #27ae60 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .tr-badge.decline { background:#fde8e6 !important; color:#c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .tr-badge.growth  { background:#e8f8ef !important; color:#27ae60 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .fp-title, .tp-title, .opps-ph-title { color:#1a1a1a !important; }
+      .fp-sub, .tp-sub, .opps-ph-sub { color:#666 !important; }
+      .funnel-col-headers, .trend-col-headers, .opps-col-hd { background:#f5f5f5 !important; color:#555 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+      /* Segments */
+      .seg-bar-track { background:#eee !important; }
+      .fill-TOP  { background:#c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .fill-MID  { background:#d68910 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .fill-TAIL { background:#2980b9 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .rev-TOP   { color:#c0392b !important; }
+      .rev-MID   { color:#d68910 !important; }
+      .rev-TAIL  { color:#2980b9 !important; }
+
+      /* Revenue bar in table */
+      .rev-bar-track { background:#eee !important; }
+      .rev-bar-fill  { background:#c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+      /* Opportunity panel */
+      .opps-panel-header { border-left:3px solid #c0392b !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .opps-rank.fire { background:#c0392b !important; color:#fff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .opps-rank.rest { background:#eee !important; color:#555 !important; }
+      .opps-score.fire { color:#c0392b !important; }
+      .opp-cell.is-top { color:#c0392b !important; }
+
+      /* Page breaks */
+      .section-gap { page-break-inside: avoid; }
+      .trends-2col, .funnel-2col, .advanced-top { page-break-inside: avoid; }
+      .table-wrap  { page-break-inside: auto; }
+      thead { display:table-header-group; }
+      tr    { page-break-inside: avoid; }
+
+      /* Footer */
+      footer { border-top:1px solid #ddd !important; color:#888 !important; }
+      .footer-meta { color:#888 !important; }
+    }
 
     /* LAYOUT */
     main { max-width: 1280px; margin: 0 auto; padding: 8rem 2.5rem 4rem; }
@@ -231,7 +362,7 @@
     .opps-ph-sub   { font-size:.72rem; color:var(--clr-muted); margin-top:.1rem; }
     .opps-col-hd {
       display:grid;
-      grid-template-columns: 28px 1fr 72px 65px 72px 65px 100px 110px;
+      grid-template-columns: 28px 1fr 72px 65px 72px 65px 110px;
       gap:.6rem; padding:.5rem 1.5rem;
       font-size:.62rem; letter-spacing:.08em; text-transform:uppercase;
       color:var(--clr-muted); background:var(--clr-surface-2);
@@ -239,7 +370,7 @@
     }
     .opps-row {
       display:grid;
-      grid-template-columns: 28px 1fr 72px 65px 72px 65px 100px 110px;
+      grid-template-columns: 28px 1fr 72px 65px 72px 65px 110px;
       align-items:center; gap:.6rem;
       padding:.9rem 1.5rem;
       border-bottom:1px solid var(--clr-border);
@@ -270,26 +401,62 @@
     .fp-icon  { font-size:1.2rem; }
     .fp-title { font-size:.88rem; font-weight:500; }
     .fp-sub   { font-size:.72rem; color:var(--clr-muted); margin-top:.1rem; }
+    .funnel-col-headers {
+      display:grid; grid-template-columns:1fr 72px 80px repeat(3, 90px);
+      gap:.5rem; padding:.5rem 1.2rem;
+      font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:var(--clr-muted);
+      border-bottom:1px solid var(--clr-border); background:var(--clr-surface-2);
+    }
+    .fch-right { text-align:right; }
+
     .funnel-product-row {
-      display:grid; grid-template-columns:1fr repeat(3,80px);
-      align-items:center; gap:.8rem; padding:.9rem 1.5rem;
-      border-bottom:1px solid var(--clr-border); font-size:.8rem;
+      display:grid; grid-template-columns:1fr 72px 80px repeat(3, 90px);
+      align-items:center; gap:.5rem; padding:.9rem 1.2rem;
+      border-bottom:1px solid var(--clr-border); font-size:.78rem;
       transition:background var(--transition);
     }
     .funnel-product-row:last-child { border-bottom:none; }
     .funnel-product-row:hover { background:var(--clr-surface-2); }
     .fp-prod-name { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .fp-prod-cat  { font-size:.68rem; color:var(--clr-muted); }
-    .fp-metric    { text-align:center; }
-    .fp-metric-val { font-weight:600; font-size:.85rem; }
-    .fp-metric-lbl { font-size:.62rem; color:var(--clr-muted); text-transform:uppercase; letter-spacing:.05em; }
-    .funnel-col-headers {
-      display:grid; grid-template-columns:1fr repeat(3,80px);
-      gap:.8rem; padding:.5rem 1.5rem;
-      font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--clr-muted);
-      border-bottom:1px solid var(--clr-border); background:var(--clr-surface-2);
+    .fp-prod-cat  { font-size:.65rem; color:var(--clr-muted); }
+    .fp-item-id   { font-size:.72rem; color:var(--clr-muted); font-family:monospace; }
+    .fp-category  { font-size:.72rem; color:var(--clr-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .fp-metric    { text-align:right; }
+    .fp-metric-val { font-weight:600; font-variant-numeric:tabular-nums; }
+    .fp-metric-lbl { font-size:.64rem; color:var(--clr-muted); }
+
+    /* Funnel filter bar */
+    .funnel-filter-bar {
+      display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+      padding:.75rem 1.2rem; border-bottom:1px solid var(--clr-border);
+      background:var(--clr-surface-2);
     }
-    .fch-right { text-align:center; }
+    .funnel-search-wrap {
+      position:relative; flex:1; min-width:160px;
+    }
+    .funnel-search-wrap svg {
+      position:absolute; left:.65rem; top:50%; transform:translateY(-50%);
+      width:13px; height:13px; stroke:var(--clr-muted); fill:none; pointer-events:none;
+    }
+    .funnel-search {
+      width:100%; padding:.38rem .75rem .38rem 2rem;
+      background:var(--clr-surface); border:1px solid var(--clr-border);
+      border-radius:var(--radius); color:var(--clr-text); font-size:.76rem;
+      outline:none; transition:border-color var(--transition);
+    }
+    .funnel-search:focus { border-color:var(--clr-accent); }
+    .funnel-search::placeholder { color:var(--clr-muted); }
+    .funnel-cat-select {
+      padding:.38rem .7rem; background:var(--clr-surface);
+      border:1px solid var(--clr-border); border-radius:var(--radius);
+      color:var(--clr-text); font-size:.76rem; outline:none; cursor:pointer;
+      transition:border-color var(--transition); min-width:130px;
+    }
+    .funnel-cat-select:focus { border-color:var(--clr-accent); }
+    .funnel-filter-count {
+      font-size:.7rem; color:var(--clr-muted); white-space:nowrap;
+    }
+    .funnel-filter-count span { color:var(--clr-accent); font-weight:600; }
 
     /* ── REVENUE TRENDS ──────────────────────────── */
     .trends-section { margin-bottom: 2.5rem; animation: fadeUp .86s ease both; }
@@ -334,6 +501,211 @@
     .tr-badge.growth  { background: rgba(46,204,113,.15); color: var(--clr-success); }
     .trend-no-compare { padding: 2.5rem 1.5rem; text-align: center; font-size: .82rem; color: var(--clr-muted); }
     @media(max-width:1024px){ .trends-2col { grid-template-columns: 1fr; } }
+
+    /* ── DATA QUALITY PANEL ─────────────────────── */
+    .dq-wrap {
+      margin-bottom: 2rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--clr-border);
+      animation: fadeUp .65s ease both;
+    }
+    /* critical banner that appears above the panel when score < 50 */
+    .dq-critical-banner {
+      display: none;
+      align-items: center; gap: .8rem;
+      padding: .85rem 1.5rem;
+      background: rgba(231,76,60,.18);
+      border-bottom: 1px solid rgba(231,76,60,.35);
+      font-size: .82rem; color: var(--clr-danger);
+    }
+    .dq-critical-banner.visible { display: flex; }
+    .dq-critical-icon { font-size: 1.1rem; flex-shrink:0; }
+
+    /* top bar — always visible */
+    .dq-bar {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .85rem 1.5rem;
+      background: var(--clr-surface);
+      cursor: pointer;
+      transition: background var(--transition);
+      border-bottom: 1px solid transparent;
+    }
+    .dq-bar:hover { background: var(--clr-surface-2); }
+    .dq-bar.open   { border-bottom-color: var(--clr-border); }
+
+    .dq-score-ring {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 2.5px solid var(--clr-border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    .dq-score-ring.score-green  { border-color: var(--clr-success); }
+    .dq-score-ring.score-yellow { border-color: var(--clr-warning); }
+    .dq-score-ring.score-red    { border-color: var(--clr-danger);  }
+    .dq-score-num {
+      font-size: .72rem; font-weight: 700; line-height: 1;
+    }
+    .dq-score-num.score-green  { color: var(--clr-success); }
+    .dq-score-num.score-yellow { color: var(--clr-warning); }
+    .dq-score-num.score-red    { color: var(--clr-danger);  }
+
+    .dq-bar-info { flex: 1; }
+    .dq-bar-title { font-size: .82rem; font-weight: 500; }
+    .dq-bar-sub   { font-size: .72rem; color: var(--clr-muted); margin-top:.1rem; }
+
+    .dq-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .dq-badge {
+      font-size: .65rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; padding: .18rem .55rem; border-radius: 3px;
+    }
+    .dq-badge.ok   { background: rgba(46,204,113,.15);  color: var(--clr-success); }
+    .dq-badge.warn { background: rgba(243,156,18,.15);  color: var(--clr-warning); }
+    .dq-badge.fail { background: rgba(231,76,60,.15);   color: var(--clr-danger);  }
+    .dq-badge.info { background: rgba(74,159,212,.15);  color: var(--clr-info); }
+
+    .dq-toggle { font-size: .75rem; color: var(--clr-muted); flex-shrink:0; transition: transform var(--transition); }
+    .dq-toggle.open { transform: rotate(180deg); }
+
+    /* check rows */
+    .dq-checks { display: none; }
+    .dq-checks.open { display: block; }
+
+    .dq-check-row {
+      display: grid;
+      grid-template-columns: 20px 160px 1fr 80px;
+      align-items: center; gap: 1rem;
+      padding: .75rem 1.5rem;
+      border-bottom: 1px solid var(--clr-border);
+      font-size: .8rem;
+      transition: background var(--transition);
+    }
+    .dq-check-row:last-child { border-bottom: none; }
+    .dq-check-row:hover { background: var(--clr-surface-2); }
+    .dq-check-row.row-fail { background: rgba(231,76,60,.06); }
+    .dq-check-row.row-warn { background: rgba(243,156,18,.05); }
+
+    .dq-check-icon { font-size: .88rem; text-align: center; }
+    .dq-check-name { font-weight: 500; font-size: .78rem; color: var(--clr-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .dq-check-msg  { font-size: .8rem; }
+    .dq-check-msg.msg-ok   { color: var(--clr-muted); }
+    .dq-check-msg.msg-warn { color: var(--clr-warning); }
+    .dq-check-msg.msg-fail { color: var(--clr-danger); font-weight: 500; }
+    .dq-check-score { text-align: right; font-size: .72rem; color: var(--clr-muted); }
+
+    .dq-connection-detail {
+      padding: .8rem 1.5rem 1rem;
+      background: rgba(231,76,60,.07);
+      border-top: 1px solid rgba(231,76,60,.2);
+      font-size: .8rem;
+    }
+    .dq-connection-detail-title { font-weight:600; color:var(--clr-danger); margin-bottom:.4rem; font-size:.82rem; }
+    .dq-connection-detail ul { padding-left:1.2rem; color:var(--clr-muted); }
+    .dq-connection-detail li { margin-bottom:.25rem; }
+    .dq-connection-detail code { font-family:monospace; font-size:.75rem; background:rgba(255,255,255,.06); padding:.1rem .35rem; border-radius:3px; }
+
+    /* ── CHAPTER HEADINGS ───────────────────────── */
+    .chapter {
+      display: flex; align-items: center; gap: 1rem;
+      margin: 3rem 0 1.4rem;
+    }
+    .chapter:first-of-type { margin-top: 0; }
+    .chapter-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1.5px solid var(--clr-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 700; color: var(--clr-accent);
+      flex-shrink: 0; letter-spacing: .04em;
+    }
+    .chapter-text {}
+    .chapter-title {
+      font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--clr-accent); line-height: 1;
+    }
+    .chapter-sub {
+      font-size: .7rem; color: var(--clr-muted); margin-top: .2rem;
+    }
+    .chapter-line {
+      flex: 1; height: 1px; background: var(--clr-border);
+    }
+
+    /* ── ACTIONS SECTION ─────────────────────────── */
+    .actions-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+      animation: fadeUp .9s ease both;
+    }
+    .action-card {
+      background: var(--clr-surface); border: 1px solid var(--clr-border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .action-card-header {
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--clr-border);
+      display: flex; align-items: center; gap: .9rem;
+    }
+    .action-card.ac-scale        .action-card-header { border-left: 3px solid var(--clr-success); }
+    .action-card.ac-optimize     .action-card-header { border-left: 3px solid var(--clr-warning); }
+    .action-card.ac-lowpriority  .action-card-header { border-left: 3px solid var(--clr-danger);  }
+    .action-card.ac-watch        .action-card-header { border-left: 3px solid var(--clr-info);    }
+
+    .ac-icon  { font-size: 1.3rem; flex-shrink: 0; }
+    .ac-hd    { flex: 1; }
+    .ac-label { font-size: .85rem; font-weight: 600; }
+    .action-card.ac-scale       .ac-label { color: var(--clr-success); }
+    .action-card.ac-optimize    .ac-label { color: var(--clr-warning); }
+    .action-card.ac-lowpriority .ac-label { color: var(--clr-danger);  }
+    .action-card.ac-watch       .ac-label { color: var(--clr-info);    }
+    .ac-desc  { font-size: .73rem; color: var(--clr-muted); margin-top: .15rem; line-height: 1.5; }
+    .ac-count { font-size: .68rem; font-weight: 600; padding: .18rem .55rem; border-radius: 3px; flex-shrink: 0; }
+    .action-card.ac-scale       .ac-count { background: rgba(46,204,113,.15);  color: var(--clr-success); }
+    .action-card.ac-optimize    .ac-count { background: rgba(243,156,18,.15);  color: var(--clr-warning); }
+    .action-card.ac-lowpriority .ac-count { background: rgba(231,76,60,.15);   color: var(--clr-danger);  }
+    .action-card.ac-watch       .ac-count { background: rgba(74,159,212,.15);  color: var(--clr-info);    }
+
+    .ac-recs {
+      padding: .9rem 1.5rem; border-bottom: 1px solid var(--clr-border);
+      background: var(--clr-surface-2);
+    }
+    .ac-recs-title { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: .55rem; }
+    .ac-rec-item {
+      display: flex; align-items: flex-start; gap: .5rem;
+      font-size: .78rem; color: var(--clr-text); margin-bottom: .35rem; line-height: 1.45;
+    }
+    .ac-rec-item:last-child { margin-bottom: 0; }
+    .ac-rec-bullet { font-size: .55rem; margin-top: .35rem; flex-shrink: 0; }
+    .action-card.ac-scale       .ac-rec-bullet { color: var(--clr-success); }
+    .action-card.ac-optimize    .ac-rec-bullet { color: var(--clr-warning); }
+    .action-card.ac-lowpriority .ac-rec-bullet { color: var(--clr-danger);  }
+    .action-card.ac-watch       .ac-rec-bullet { color: var(--clr-info);    }
+
+    .ac-products { }
+    .ac-product-row {
+      display: grid; grid-template-columns: 1fr 60px 60px 65px;
+      align-items: center; gap: .6rem;
+      padding: .65rem 1.5rem;
+      border-bottom: 1px solid var(--clr-border);
+      font-size: .78rem; transition: background var(--transition);
+    }
+    .ac-product-row:last-child { border-bottom: none; }
+    .ac-product-row:hover { background: var(--clr-surface-2); }
+    .ac-prod-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ac-prod-cat  { font-size: .66rem; color: var(--clr-muted); }
+    .ac-prod-val  { text-align: right; font-variant-numeric: tabular-nums; font-size: .74rem; }
+    .ac-prod-val.muted { color: var(--clr-muted); }
+    .ac-col-hd {
+      display: grid; grid-template-columns: 1fr 60px 60px 65px;
+      gap: .6rem; padding: .4rem 1.5rem;
+      font-size: .6rem; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--clr-muted); background: var(--clr-surface-2);
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .ac-col-hd span { text-align: right; }
+    .ac-col-hd span:first-child { text-align: left; }
+    .ac-empty {
+      padding: 1.2rem 1.5rem; font-size: .8rem; color: var(--clr-muted);
+      font-style: italic;
+    }
+
+    @media(max-width:900px){ .actions-grid { grid-template-columns: 1fr; } }
 
     /* ── ADVANCED METRICS ────────────────────────── */
     .advanced-section { animation:fadeUp .88s ease both; }
@@ -435,7 +807,12 @@
 <nav>
   <a class="nav-logo" href="idex1.html">Portfolio Analysis</a>
   <span class="nav-meta" id="nav-range">Last 90 days</span>
-  <a class="nav-back" href="idex1.html">← Back</a>
+  <div class="nav-right">
+    <button class="btn-pdf" onclick="downloadPDF()" title="Download this report as PDF">
+      ↓ PDF
+    </button>
+    <a class="nav-back" href="idex1.html">← Back</a>
+  </div>
 </nav>
 
 <!-- DATE FILTER BAR -->
@@ -477,24 +854,56 @@
     <p class="page-sub" id="report-sub">Generating report…</p>
   </div>
 
-  <!-- 1. OVERVIEW -->
-  <p class="section-label">Overview</p>
+  <!-- DATA QUALITY PANEL -->
+  <div class="dq-wrap" id="dq-wrap">
+    <div class="dq-critical-banner" id="dq-critical-banner">
+      <span class="dq-critical-icon">🚨</span>
+      <span id="dq-critical-msg">Critical data quality issues detected — report data may be unreliable.</span>
+    </div>
+    <div class="dq-bar" id="dq-bar" onclick="toggleDQ()">
+      <div class="dq-score-ring" id="dq-score-ring">
+        <span class="dq-score-num" id="dq-score-num">—</span>
+      </div>
+      <div class="dq-bar-info">
+        <div class="dq-bar-title">Data Quality Score</div>
+        <div class="dq-bar-sub" id="dq-bar-sub">Running checks…</div>
+      </div>
+      <div class="dq-badges" id="dq-badges"></div>
+      <span class="dq-toggle" id="dq-toggle">▼</span>
+    </div>
+    <div class="dq-checks" id="dq-checks"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       1. OVERVIEW
+  ══════════════════════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-num">1</div>
+    <div class="chapter-text">
+      <div class="chapter-title">Overview</div>
+      <div class="chapter-sub">Top-level performance summary for the selected period</div>
+    </div>
+    <div class="chapter-line"></div>
+  </div>
+
   <div class="overview-grid" id="overview-grid"></div>
 
-  <!-- 2. PRODUCT PORTFOLIO MANAGEMENT -->
-  <div class="section-gap">
-    <p class="section-label">Product Portfolio Management</p>
-    <div class="portfolio-grid" id="portfolio-grid"></div>
+  <!-- ══════════════════════════════════════════════
+       2. PRODUCT INTELLIGENCE
+  ══════════════════════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-num">2</div>
+    <div class="chapter-text">
+      <div class="chapter-title">Product Intelligence</div>
+      <div class="chapter-sub">Revenue segmentation, category breakdown and full product metrics</div>
+    </div>
+    <div class="chapter-line"></div>
   </div>
 
-  <!-- 3. REVENUE SEGMENTS -->
-  <div class="section-gap">
-    <p class="section-label">Revenue Segments</p>
-    <div class="segments-grid" id="segments-grid"></div>
-    <div class="category-breakdown" id="category-breakdown"></div>
-  </div>
+  <p class="section-label">Revenue Segments</p>
+  <div class="segments-grid" id="segments-grid"></div>
+  <div class="category-breakdown" id="category-breakdown"></div>
 
-  <!-- 4. ALL PRODUCTS TABLE -->
   <div class="section-gap">
     <p class="section-label">All Products</p>
     <div class="table-wrap">
@@ -510,16 +919,6 @@
               <button class="filter-tab ftab-segment" onclick="filterTable('segment','LONG_TAIL',this)">Long Tail</button>
             </div>
           </div>
-          <div class="filter-group">
-            <span class="filter-group-lbl">Decision</span>
-            <div class="filter-tabs">
-              <button class="filter-tab ftab-label active" onclick="filterTable('label','ALL',this)">All</button>
-              <button class="filter-tab ftab-label" onclick="filterTable('label','SCALE',this)">🟢 Scale</button>
-              <button class="filter-tab ftab-label" onclick="filterTable('label','OPTIMIZE',this)">🟡 Optimize</button>
-              <button class="filter-tab ftab-label" onclick="filterTable('label','LOW_PRIORITY',this)">🔴 Low Priority</button>
-              <button class="filter-tab ftab-label" onclick="filterTable('label','WATCH',this)">🔵 Watch</button>
-            </div>
-          </div>
         </div>
       </div>
       <div style="overflow-x:auto">
@@ -528,34 +927,35 @@
     </div>
   </div>
 
-  <!-- 5. TOP OPPORTUNITIES -->
-  <div class="section-gap opps-section">
-    <p class="section-label">🔥 Top Opportunities</p>
-    <div class="opps-panel">
-      <div class="opps-panel-header">
-        <span class="opps-ph-icon">🎯</span>
-        <div>
-          <div class="opps-ph-title">High-Potential Underperforming Products</div>
-          <div class="opps-ph-sub">Score = Views × (1 − CVR) × AOV — products leaving the most unconverted revenue on the table</div>
-        </div>
-      </div>
-      <div class="opps-col-hd">
-        <span>#</span>
-        <span>Product</span>
-        <span class="o-right">Views</span>
-        <span class="o-right">CVR</span>
-        <span class="o-right">AOV</span>
-        <span class="o-right">RPV</span>
-        <span>Decision</span>
-        <span class="o-right">Opp. Score</span>
-      </div>
-      <div id="opp-list"></div>
+  <!-- ══════════════════════════════════════════════
+       3. FUNNEL DIAGNOSTICS
+  ══════════════════════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-num">3</div>
+    <div class="chapter-text">
+      <div class="chapter-title">Funnel Diagnostics</div>
+      <div class="chapter-sub">Cart abandonment, top performers and revenue trend analysis</div>
     </div>
+    <div class="chapter-line"></div>
   </div>
 
-  <!-- 6. FUNNEL ANALYSIS -->
-  <div class="section-gap funnel-section">
+  <div class="funnel-section">
     <p class="section-label">Funnel Analysis</p>
+
+    <!-- Funnel filter bar (shared for both panels) -->
+    <div class="funnel-filter-bar">
+      <div class="funnel-search-wrap">
+        <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="funnel-search" id="funnel-search" type="text"
+          placeholder="Hledat podle názvu produktu…"
+          oninput="applyFunnelFilter()">
+      </div>
+      <select class="funnel-cat-select" id="funnel-cat" onchange="applyFunnelFilter()">
+        <option value="">Všechny kategorie</option>
+      </select>
+      <span class="funnel-filter-count" id="funnel-filter-count"></span>
+    </div>
+
     <div class="funnel-2col">
 
       <div class="funnel-panel">
@@ -568,6 +968,8 @@
         </div>
         <div class="funnel-col-headers">
           <span>Product</span>
+          <span>Item ID</span>
+          <span>Kategorie</span>
           <span class="fch-right">Carts</span>
           <span class="fch-right">Cart→Buy</span>
           <span class="fch-right">Lost rev.</span>
@@ -585,6 +987,8 @@
         </div>
         <div class="funnel-col-headers">
           <span>Product</span>
+          <span>Item ID</span>
+          <span>Kategorie</span>
           <span class="fch-right">Views</span>
           <span class="fch-right">V→Buy</span>
           <span class="fch-right">Revenue</span>
@@ -595,7 +999,6 @@
     </div>
   </div>
 
-  <!-- 7. REVENUE TRENDS -->
   <div class="section-gap trends-section">
     <p class="section-label">Revenue Trends</p>
     <div class="trends-2col">
@@ -637,10 +1040,57 @@
     </div>
   </div>
 
-  <!-- 8. ADVANCED METRICS -->
-  <div class="section-gap advanced-section">
-    <p class="section-label">Advanced Metrics</p>
+  <!-- ══════════════════════════════════════════════
+       4. ADVANCED METRICS
+  ══════════════════════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-num">4</div>
+    <div class="chapter-text">
+      <div class="chapter-title">Advanced Metrics</div>
+      <div class="chapter-sub">Portfolio KPIs, customer lifetime value and product-level productivity</div>
+    </div>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="advanced-section">
     <div class="advanced-top" id="advanced-cards"></div>
+  </div>
+
+  <div class="section-gap">
+    <p class="section-label">Product Portfolio Management</p>
+    <div class="portfolio-grid" id="portfolio-grid"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       5. DECISION MAKING
+  ══════════════════════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-num">5</div>
+    <div class="chapter-text">
+      <div class="chapter-title">Decision Making</div>
+      <div class="chapter-sub">Per-product action recommendations based on RPV, CVR and traffic — filter by segment</div>
+    </div>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-title">Product Decision Table</span>
+      <div class="filter-groups">
+        <div class="filter-group">
+          <span class="filter-group-lbl">Segment</span>
+          <div class="filter-tabs">
+            <button class="filter-tab ftab-dm active" onclick="filterDM('ALL',this)">All</button>
+            <button class="filter-tab ftab-dm" onclick="filterDM('TOP',this)">Top</button>
+            <button class="filter-tab ftab-dm" onclick="filterDM('MID',this)">Mid</button>
+            <button class="filter-tab ftab-dm" onclick="filterDM('LONG_TAIL',this)">Long Tail</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="dm-table"></table>
+    </div>
   </div>
 
 </main>
@@ -855,6 +1305,9 @@ let STATE = { days: 90, from: null, to: null, compareMode: 'prev' };
 let SORT         = { col: 'revenue', dir: 'desc' };
 let TABLE_FILTER = { segment: 'ALL', label: 'ALL' };
 let CURRENT_PRODUCTS = [];  // set each refresh(), used for sort/filter re-renders
+
+// Funnel filter state
+let FUNNEL_PRODUCTS = [];   // set each refresh(), used for funnel filter re-renders
 
 /* ================================================================
    DATA SCALING + SIMULATION
@@ -1120,11 +1573,10 @@ function renderTable(products) {
     <th class="right ${sc('cvr')}"      onclick="setSort('cvr')"      title="View-to-Purchase conversion rate">CVR ${sa('cvr')}</th>
     <th class="${sc('funnelScore')}"     onclick="setSort('funnelScore')" title="Funnel Score = (V→Cart × 0.4) + (Cart→Buy × 0.6) × 100">Funnel ${sa('funnelScore')}</th>
     <th class="right ${sc('opportunityScore')}" onclick="setSort('opportunityScore')" title="Opportunity Score = Views × (1 − CVR) × AOV">Opp. Score ${sa('opportunityScore')}</th>
-    <th class="center" title="Auto-assigned decision label based on RPV + CVR thresholds">Decision</th>
     <th class="center">Segment</th>
   </tr></thead>`;
 
-  const emptyRow = `<tbody><tr><td colspan="10" style="padding:2rem;text-align:center;color:var(--clr-muted);font-size:.82rem">No products match the current filter.</td></tr></tbody>`;
+  const emptyRow = `<tbody><tr><td colspan="9" style="padding:2rem;text-align:center;color:var(--clr-muted);font-size:.82rem">No products match the current filter.</td></tr></tbody>`;
 
   const tbody = filtered.length === 0 ? emptyRow : `<tbody>${filtered.map(p => {
     const fsCls    = p.funnelScore >= THRESHOLDS.FSCORE_GOOD ? 'fscore-good' : p.funnelScore >= THRESHOLDS.FSCORE_WARN ? 'fscore-warn' : 'fscore-bad';
@@ -1156,9 +1608,6 @@ function renderTable(products) {
         </td>
         <td class="right opp-cell${isTopOpp ? ' is-top' : ''}">${isTopOpp ? '🔥 ' : ''}${fmt.compact(p.opportunityScore)}</td>
         <td class="center">
-          <span class="seg-pill ${LABEL_BADGE[p.label]}" title="${p.labelTooltip}">${LABEL_NAMES[p.label]}</span>
-        </td>
-        <td class="center">
           <span class="seg-pill ${segBadgeCls[p.segment]}">${segBadgeLbl[p.segment]}</span>
         </td>
       </tr>`;
@@ -1170,53 +1619,71 @@ function renderTable(products) {
 /* ================================================================
    RENDER — Top Opportunities
 ================================================================ */
-function renderTopOpportunities(products) {
-  const top8 = [...products]
-    .sort((a, b) => b.opportunityScore - a.opportunityScore)
-    .slice(0, 8);
-
-  document.getElementById('opp-list').innerHTML = top8.map((p, i) => {
-    const isFire   = i < 3;
-    const cvrCls   = rateClass(p.funnel.v2p, THRESHOLDS.CVR_GOOD, THRESHOLDS.CVR_WARN);
-    return `
-      <div class="opps-row">
-        <div class="opps-rank ${isFire ? 'fire' : 'rest'}">${i + 1}</div>
-        <div>
-          <div class="opps-name">${p.name}</div>
-          <div class="opps-cat">${p.category} · ${p.id}</div>
-        </div>
-        <span class="opps-num">${fmt.num(p.views)}</span>
-        <span class="opps-num"><span class="${cvrCls}">${fmt.pct(p.funnel.v2p)}</span></span>
-        <span class="opps-num">${fmt.currency(p.productAOV)}</span>
-        <span class="opps-num ${p.rpvClass}">${fmt.rpv(p.rpv)}</span>
-        <span><span class="seg-pill ${LABEL_BADGE[p.label]}" title="${p.labelTooltip}">${LABEL_NAMES[p.label]}</span></span>
-        <span class="opps-score ${isFire ? 'fire' : 'rest'}">${isFire ? '🔥 ' : ''}${fmt.compact(p.opportunityScore)}</span>
-      </div>`;
-  }).join('');
-}
 
 /* ================================================================
    RENDER — Funnel Analysis
 ================================================================ */
 function renderFunnelAnalysis(products) {
-  const abandoned = products
-    .filter(p => p.carts >= THRESHOLDS.ABANDONMENT_CARTS_MIN && p.funnel.c2p < THRESHOLDS.ABANDONMENT_C2P_MAX)
-    .sort((a, b) => b.carts - a.carts);
+  // Save full product list for filter re-renders
+  FUNNEL_PRODUCTS = products;
 
+  // Populate category dropdown
+  const cats = [...new Set(products.map(p => p.category))].sort();
+  const catSel = document.getElementById('funnel-cat');
+  const prevCat = catSel.value;
+  catSel.innerHTML = '<option value="">Všechny kategorie</option>'
+    + cats.map(c => `<option value="${c}" ${c === prevCat ? 'selected' : ''}>${c}</option>`).join('');
+
+  // Reset search on full refresh
+  document.getElementById('funnel-search').value = '';
+  document.getElementById('funnel-filter-count').innerHTML = '';
+
+  renderFunnelPanels(products);
+}
+
+function applyFunnelFilter() {
+  const q   = document.getElementById('funnel-search').value.trim().toLowerCase();
+  const cat = document.getElementById('funnel-cat').value;
+
+  const filtered = FUNNEL_PRODUCTS.filter(p => {
+    const matchQ   = !q || p.name.toLowerCase().includes(q);
+    const matchCat = !cat || p.category === cat;
+    return matchQ && matchCat;
+  });
+
+  const total = FUNNEL_PRODUCTS.length;
+  const shown = filtered.length;
+  const countEl = document.getElementById('funnel-filter-count');
+  if (q || cat) {
+    countEl.innerHTML = `Zobrazeno: <span>${shown}</span> z ${total} produktů`;
+  } else {
+    countEl.innerHTML = '';
+  }
+
+  renderFunnelPanels(filtered);
+}
+
+function renderFunnelPanels(products) {
   const lostRevEst = p => {
     const lost = Math.max(0, Math.round(p.carts * THRESHOLDS.GOOD_C2P) - p.orders);
     return lost * p.price;
   };
 
+  const abandoned = products
+    .filter(p => p.carts >= THRESHOLDS.ABANDONMENT_CARTS_MIN && p.funnel.c2p < THRESHOLDS.ABANDONMENT_C2P_MAX)
+    .sort((a, b) => b.carts - a.carts);
+
   document.getElementById('abandonment-list').innerHTML = abandoned.length
     ? abandoned.map(p => `
         <div class="funnel-product-row">
-          <div><div class="fp-prod-name">${p.name}</div><div class="fp-prod-cat">${p.category}</div></div>
+          <div><div class="fp-prod-name">${p.name}</div></div>
+          <div class="fp-item-id">${p.id}</div>
+          <div class="fp-category">${p.category}</div>
           <div class="fp-metric"><div class="fp-metric-val rate-warn">${fmt.num(p.carts)}</div><div class="fp-metric-lbl">adds</div></div>
           <div class="fp-metric"><div class="fp-metric-val rate-bad">${fmt.pct(p.funnel.c2p)}</div><div class="fp-metric-lbl">conv.</div></div>
           <div class="fp-metric"><div class="fp-metric-val rate-bad">${fmt.currency(lostRevEst(p))}</div><div class="fp-metric-lbl">est. lost</div></div>
         </div>`).join('')
-    : '<div style="padding:1.5rem;font-size:.82rem;color:var(--clr-muted)">No high-abandonment products detected.</div>';
+    : '<div style="padding:1.5rem;font-size:.82rem;color:var(--clr-muted)">Žádné produkty neodpovídají filtru.</div>';
 
   const performers = products
     .filter(p => p.funnel.v2c >= THRESHOLDS.TOP_PERF_V2C_MIN && p.funnel.c2p >= THRESHOLDS.TOP_PERF_C2P_MIN)
@@ -1225,12 +1692,14 @@ function renderFunnelAnalysis(products) {
   document.getElementById('top-performers-list').innerHTML = performers.length
     ? performers.map(p => `
         <div class="funnel-product-row">
-          <div><div class="fp-prod-name">${p.name}</div><div class="fp-prod-cat">${p.category}</div></div>
+          <div><div class="fp-prod-name">${p.name}</div></div>
+          <div class="fp-item-id">${p.id}</div>
+          <div class="fp-category">${p.category}</div>
           <div class="fp-metric"><div class="fp-metric-val">${fmt.num(p.views)}</div><div class="fp-metric-lbl">views</div></div>
           <div class="fp-metric"><div class="fp-metric-val rate-good">${fmt.pct(p.funnel.v2p)}</div><div class="fp-metric-lbl">CVR</div></div>
           <div class="fp-metric"><div class="fp-metric-val rate-good">${fmt.currency(p.revenue)}</div><div class="fp-metric-lbl">revenue</div></div>
         </div>`).join('')
-    : '<div style="padding:1.5rem;font-size:.82rem;color:var(--clr-muted)">No top performers matched threshold.</div>';
+    : '<div style="padding:1.5rem;font-size:.82rem;color:var(--clr-muted)">Žádné produkty neodpovídají filtru.</div>';
 }
 
 /* ================================================================
@@ -1303,6 +1772,334 @@ function renderAdvanced(ov) {
 }
 
 /* ================================================================
+   RENDER — Decision Making table
+================================================================ */
+
+// Short recommended action per label — shown inline in the table row
+const DM_ACTION = {
+  SCALE:        { icon: '🟢', label: 'Scale',        cls: 'badge-SCALE',        action: 'Increase paid traffic, expand audiences, protect stock — ROI is proven' },
+  OPTIMIZE:     { icon: '🟡', label: 'Optimize',     cls: 'badge-OPTIMIZE',     action: 'Audit product page, A/B test CTA, check pricing vs. category benchmark' },
+  LOW_PRIORITY: { icon: '🔴', label: 'Low Priority', cls: 'badge-LOW_PRIORITY', action: 'Review catalogue fit, reposition or set 60-day sunset deadline' },
+  WATCH:        { icon: '🔵', label: 'Watch',        cls: 'badge-WATCH',        action: 'Monitor CVR trend weekly, identify recent changes before acting' },
+};
+
+let DM_FILTER = 'ALL';
+let DM_PRODUCTS = [];
+
+function filterDM(seg, btn) {
+  DM_FILTER = seg;
+  document.querySelectorAll('.ftab-dm').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderDMTable(DM_PRODUCTS);
+}
+
+function renderDMTable(products) {
+  DM_PRODUCTS = products;
+
+  const segBadgeCls = { TOP: 'badge-TOP', MID: 'badge-MID', LONG_TAIL: 'badge-TAIL' };
+  const segBadgeLbl = { TOP: 'Top',       MID: 'Mid',       LONG_TAIL: 'Long Tail'  };
+
+  const filtered = DM_FILTER === 'ALL'
+    ? [...products]
+    : products.filter(p => p.segment === DM_FILTER);
+
+  // Sort: Scale first, then Optimize, Watch, Low Priority — within each group by revenue desc
+  const order = ['SCALE', 'OPTIMIZE', 'WATCH', 'LOW_PRIORITY'];
+  filtered.sort((a, b) => {
+    const oi = order.indexOf(a.label) - order.indexOf(b.label);
+    return oi !== 0 ? oi : b.revenue - a.revenue;
+  });
+
+  const thead = `<thead><tr>
+    <th style="min-width:170px">Product</th>
+    <th class="center">Category</th>
+    <th class="center">Segment</th>
+    <th class="right">Revenue</th>
+    <th class="right">CVR</th>
+    <th class="right">RPV</th>
+    <th class="center" style="min-width:90px">Decision</th>
+    <th style="min-width:260px">Recommended Action</th>
+  </tr></thead>`;
+
+  const emptyRow = `<tbody><tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--clr-muted);font-size:.82rem">No products in this segment.</td></tr></tbody>`;
+
+  if (!filtered.length) {
+    document.getElementById('dm-table').innerHTML = thead + emptyRow;
+    return;
+  }
+
+  const tbody = `<tbody>${filtered.map(p => {
+    const dm     = DM_ACTION[p.label];
+    const cvrCls = rateClass(p.funnel.v2p, THRESHOLDS.CVR_GOOD, THRESHOLDS.CVR_WARN);
+    return `<tr>
+      <td><div class="prod-name">${p.name}</div><div class="prod-id">${p.id}</div></td>
+      <td class="center"><span class="cat-pill">${p.category}</span></td>
+      <td class="center"><span class="seg-pill ${segBadgeCls[p.segment]}">${segBadgeLbl[p.segment]}</span></td>
+      <td class="right">${fmt.currency(p.revenue)}</td>
+      <td class="right"><span class="${cvrCls}">${fmt.pct(p.funnel.v2p)}</span></td>
+      <td class="right"><span class="${p.rpvClass}">${fmt.rpv(p.rpv)}</span></td>
+      <td class="center">
+        <span class="seg-pill ${dm.cls}" title="${p.labelTooltip}">${dm.icon} ${dm.label}</span>
+      </td>
+      <td style="font-size:.76rem;color:var(--clr-muted);line-height:1.45">${dm.action}</td>
+    </tr>`;
+  }).join('')}</tbody>`;
+
+  document.getElementById('dm-table').innerHTML = thead + tbody;
+}
+
+/* ================================================================
+   DATA QUALITY LAYER
+   Each check returns: { pass: true|'warn'|false, msg: string, detail?: string }
+   Critical checks penalise -20 on fail; non-critical -10 fail / -5 warn.
+================================================================ */
+
+// Simulated GA4 connection state.
+// In production this would be set by the actual API handshake.
+const GA4_STATUS = {
+  connected:    GA4_CONFIG.propertyId !== '' && GA4_CONFIG.propertyId !== 'DEMO-123456789',
+  isDemo:       GA4_CONFIG.propertyId === 'DEMO-123456789',
+  propertyId:   GA4_CONFIG.propertyId,
+  lastFetchedAt: new Date(),   // would be the real API response timestamp
+  errorCode:    null,          // null | 'NO_PROPERTY_ID' | 'INVALID_FORMAT' | 'AUTH_DENIED' | 'QUOTA_EXCEEDED' | 'NETWORK_ERROR'
+  errorDetail:  null,
+};
+
+const DQ_CHECKS = [
+  /* ── 1. GA4 Connection ──────────────────── */
+  {
+    id: 'ga4_connection', name: 'GA4 Connection', critical: true,
+    run(products) {
+      if (!GA4_STATUS.propertyId)
+        return { pass: false, msg: 'No GA4 Property ID configured', errorCode: 'NO_PROPERTY_ID',
+          detail: 'Open <code>GA4_CONFIG</code> and set a valid <code>propertyId</code>, or connect via the landing page.' };
+      if (GA4_STATUS.isDemo)
+        return { pass: 'warn', msg: 'Running on demo data — real GA4 property not connected',
+          detail: 'This report uses built-in sample data. Go back to the landing page and enter your GA4 Property ID or sign in with Google.' };
+      if (GA4_STATUS.errorCode === 'AUTH_DENIED')
+        return { pass: false, msg: 'GA4 authentication denied — OAuth token revoked or expired',
+          detail: 'Re-authorise access in your Google Account → Security → Third-party apps.' };
+      if (GA4_STATUS.errorCode === 'QUOTA_EXCEEDED')
+        return { pass: false, msg: 'GA4 API quota exceeded — data cannot be fetched',
+          detail: 'You have hit the GA4 Data API daily quota. Try again tomorrow or request a quota increase in Google Cloud Console.' };
+      if (GA4_STATUS.errorCode === 'NETWORK_ERROR')
+        return { pass: false, msg: 'Network error — unable to reach GA4 API',
+          detail: 'Check your internet connection, or verify that the GA4 Data API is not blocked by a firewall or CORS policy.' };
+      return { pass: true, msg: `Connected — Property ${GA4_STATUS.propertyId}` };
+    }
+  },
+
+  /* ── 2. Product Count ───────────────────── */
+  {
+    id: 'product_count', name: 'Product Count', critical: false,
+    run(products) {
+      if (products.length === 0)
+        return { pass: false, msg: 'No products returned by GA4 — item-scoped data missing',
+          detail: 'Ensure <code>items</code> array is included in your GA4 purchase and view_item events.' };
+      if (products.length < 3)
+        return { pass: 'warn', msg: `Only ${products.length} products — data may be incomplete`,
+          detail: 'Check that GA4 item tracking fires on all product pages, not just the checkout.' };
+      return { pass: true, msg: `${products.length} products loaded` };
+    }
+  },
+
+  /* ── 3. Revenue Integrity ───────────────── */
+  {
+    id: 'revenue_integrity', name: 'Revenue Integrity', critical: true,
+    run(products) {
+      const ordersNoRev = products.filter(p => p.orders > 0 && p.revenue === 0);
+      if (ordersNoRev.length > 0)
+        return { pass: false, msg: `${ordersNoRev.length} product${ordersNoRev.length > 1 ? 's' : ''} have orders but $0 revenue — purchase event missing value`,
+          detail: `Affected SKUs: ${ordersNoRev.slice(0,3).map(p=>p.id).join(', ')}${ordersNoRev.length>3?'…':''}. Add <code>value</code> and <code>currency</code> params to the GA4 <code>purchase</code> event.` };
+      const zeroAll = products.filter(p => p.revenue === 0).length;
+      if (zeroAll / products.length > 0.6)
+        return { pass: 'warn', msg: `${zeroAll} of ${products.length} products show $0 revenue`,
+          detail: 'More than 60 % of SKUs have no revenue. Verify that ecommerce tracking is enabled for all product pages.' };
+      return { pass: true, msg: 'All revenue values consistent' };
+    }
+  },
+
+  /* ── 4. Funnel Logic ────────────────────── */
+  {
+    id: 'funnel_logic', name: 'Funnel Sequence', critical: true,
+    run(products) {
+      const broken = products.filter(p => p.orders > p.carts || p.carts > p.views);
+      if (broken.length > 0)
+        return { pass: false, msg: `${broken.length} product${broken.length>1?'s':''} have impossible funnel values (orders > carts or carts > views)`,
+          detail: `Affected SKUs: ${broken.slice(0,3).map(p=>p.id).join(', ')}. Likely cause: duplicate <code>add_to_cart</code> or <code>view_item</code> events, or mismatched item IDs between events.` };
+      return { pass: true, msg: 'Funnel sequence valid across all products' };
+    }
+  },
+
+  /* ── 5. Required Fields ─────────────────── */
+  {
+    id: 'required_fields', name: 'Required Fields', critical: true,
+    run(products) {
+      const required = ['id','name','views','carts','orders','revenue','price'];
+      const missing  = [];
+      products.forEach(p => {
+        required.forEach(f => {
+          if (p[f] === undefined || p[f] === null) missing.push(`${p.id||'?'}.${f}`);
+        });
+      });
+      if (missing.length > 0)
+        return { pass: false, msg: `Missing fields: ${missing.slice(0,4).join(', ')}${missing.length>4?`… (+${missing.length-4} more)`:''}`,
+          detail: 'Ensure all GA4 item parameters (item_id, item_name, price, quantity) are passed in every ecommerce event.' };
+      return { pass: true, msg: 'All required fields present' };
+    }
+  },
+
+  /* ── 6. Traffic / View Data ─────────────── */
+  {
+    id: 'traffic_data', name: 'Traffic Data', critical: false,
+    run(products) {
+      const zeroViews = products.filter(p => p.views === 0);
+      if (zeroViews.length === products.length)
+        return { pass: false, msg: 'All products have 0 views — GA4 view_item event not firing',
+          detail: 'The <code>view_item</code> event is missing from all product detail pages. Add it to your dataLayer push.' };
+      if (zeroViews.length > 0)
+        return { pass: 'warn', msg: `${zeroViews.length} product${zeroViews.length>1?'s':''} have 0 views — check impression tracking`,
+          detail: `SKUs with no views: ${zeroViews.slice(0,3).map(p=>p.id).join(', ')}. These products may not have a detail page or the <code>view_item</code> event is not implemented.` };
+      return { pass: true, msg: 'View tracking data present for all products' };
+    }
+  },
+
+  /* ── 7. Price Consistency ───────────────── */
+  {
+    id: 'price_consistency', name: 'Price Consistency', critical: false,
+    run(products) {
+      const issues = products.filter(p => {
+        if (p.orders < 1 || p.price <= 0) return false;
+        const expected = p.orders * p.price;
+        return Math.abs(p.revenue - expected) / expected > 0.35;
+      });
+      if (issues.length > 2)
+        return { pass: 'warn', msg: `${issues.length} products: revenue deviates >35 % from orders × price`,
+          detail: `SKUs: ${issues.slice(0,3).map(p=>p.id).join(', ')}. Possible causes: discounts, bundles, or incorrect <code>price</code> param in GA4 events.` };
+      return { pass: true, msg: 'Revenue vs price consistent' };
+    }
+  },
+
+  /* ── 8. Date Range Sanity ───────────────── */
+  {
+    id: 'date_range', name: 'Date Range', critical: false,
+    run(products) {
+      if (STATE.days > 400)
+        return { pass: 'warn', msg: `Date range is ${STATE.days} days — may include multiple seasonal cycles`,
+          detail: 'Ranges over 400 days can distort trend comparisons. Consider splitting into YoY periods.' };
+      if (STATE.days < 7)
+        return { pass: 'warn', msg: `Only ${STATE.days} days selected — small sample size`,
+          detail: 'Short ranges have high variance. Extend to at least 14 days for stable metrics.' };
+      return { pass: true, msg: `${STATE.days}-day window within normal range` };
+    }
+  },
+];
+
+/* Score weights */
+const DQ_WEIGHTS = { critical_fail: 25, fail: 12, warn: 5 };
+
+function runDQChecks(products) {
+  let score    = 100;
+  let passCount = 0, warnCount = 0, failCount = 0;
+  let criticalFails = [];
+
+  const results = DQ_CHECKS.map(chk => {
+    const r = chk.run(products);
+    if (r.pass === true) {
+      passCount++;
+    } else if (r.pass === 'warn') {
+      warnCount++;
+      score -= DQ_WEIGHTS.warn;
+    } else {
+      failCount++;
+      score -= chk.critical ? DQ_WEIGHTS.critical_fail : DQ_WEIGHTS.fail;
+      if (chk.critical) criticalFails.push({ name: chk.name, msg: r.msg, detail: r.detail });
+    }
+    return { id: chk.id, name: chk.name, critical: chk.critical, result: r };
+  });
+
+  score = Math.max(0, Math.min(100, score));
+
+  const grade = score >= 90 ? { label: 'Excellent', cls: 'score-green' }
+              : score >= 75 ? { label: 'Good',      cls: 'score-green' }
+              : score >= 55 ? { label: 'Fair',       cls: 'score-yellow' }
+              : score >= 35 ? { label: 'Poor',       cls: 'score-red' }
+              :               { label: 'Critical',   cls: 'score-red' };
+
+  return { score, grade, passCount, warnCount, failCount, criticalFails, results };
+}
+
+let DQ_OPEN = false;
+
+function toggleDQ() {
+  DQ_OPEN = !DQ_OPEN;
+  document.getElementById('dq-checks').classList.toggle('open', DQ_OPEN);
+  document.getElementById('dq-bar').classList.toggle('open', DQ_OPEN);
+  document.getElementById('dq-toggle').classList.toggle('open', DQ_OPEN);
+}
+
+function renderDQPanel(products) {
+  const { score, grade, passCount, warnCount, failCount, criticalFails, results } = runDQChecks(products);
+
+  // Score ring
+  const ring    = document.getElementById('dq-score-ring');
+  const scoreEl = document.getElementById('dq-score-num');
+  ring.className    = `dq-score-ring ${grade.cls}`;
+  scoreEl.className = `dq-score-num ${grade.cls}`;
+  scoreEl.textContent = score;
+
+  // Sub-title
+  const sub = score >= 90 ? `All checks passed — data is reliable`
+            : score >= 75 ? `Minor issues detected — data is mostly reliable`
+            : score >= 55 ? `Several issues — review warnings before sharing`
+            :               `Critical issues — data may be unreliable`;
+  document.getElementById('dq-bar-sub').textContent = `${grade.label} · ${sub}`;
+
+  // Badges
+  const badges = [];
+  if (passCount) badges.push(`<span class="dq-badge ok">✓ ${passCount} passed</span>`);
+  if (warnCount) badges.push(`<span class="dq-badge warn">⚠ ${warnCount} warn</span>`);
+  if (failCount) badges.push(`<span class="dq-badge fail">✕ ${failCount} failed</span>`);
+  document.getElementById('dq-badges').innerHTML = badges.join('');
+
+  // Critical banner
+  const banner = document.getElementById('dq-critical-banner');
+  if (criticalFails.length > 0) {
+    banner.classList.add('visible');
+    document.getElementById('dq-critical-msg').textContent =
+      `🚨 Critical issue${criticalFails.length>1?'s':''}: ${criticalFails.map(f=>f.name).join(' · ')} — expand panel below for details`;
+    // Auto-open panel on critical
+    if (!DQ_OPEN) toggleDQ();
+  } else {
+    banner.classList.remove('visible');
+  }
+
+  // Check rows
+  const iconMap = { true: '✅', warn: '⚠️', false: '❌' };
+  const msgCls  = { true: 'msg-ok', warn: 'msg-warn', false: 'msg-fail' };
+  const rowCls  = { true: '', warn: 'row-warn', false: 'row-fail' };
+
+  document.getElementById('dq-checks').innerHTML = results.map(r => {
+    const p    = r.result.pass;
+    const pStr = String(p);
+    const penaltyLabel = p === true ? '—'
+                       : p === 'warn' ? `-${DQ_WEIGHTS.warn} pts`
+                       : r.critical   ? `-${DQ_WEIGHTS.critical_fail} pts`
+                       :               `-${DQ_WEIGHTS.fail} pts`;
+    const detail = r.result.detail
+      ? `<div class="dq-connection-detail"><div class="dq-connection-detail-title">How to fix</div><ul><li>${r.result.detail}</li></ul></div>`
+      : '';
+    return `
+      <div class="dq-check-row ${rowCls[pStr]}">
+        <span class="dq-check-icon">${iconMap[pStr]}</span>
+        <span class="dq-check-name">${r.name}${r.critical?' <span style="color:var(--clr-danger);font-size:.55rem">●CRITICAL</span>':''}</span>
+        <span class="dq-check-msg ${msgCls[pStr]}">${r.result.msg}</span>
+        <span class="dq-check-score">${penaltyLabel}</span>
+      </div>${detail}`;
+  }).join('');
+}
+
+/* ================================================================
    ORCHESTRATOR
 ================================================================ */
 function refresh() {
@@ -1322,15 +2119,16 @@ function refresh() {
     ovPrev           = overview(prevProducts);
   }
 
+  renderDQPanel(products);
   renderOverview(ov, ovPrev);
   renderPortfolio(ov, ovPrev);
   renderSegments(segs);
   renderCategoryBreakdown(cats);
   renderTable(products);
-  renderTopOpportunities(products);
   renderFunnelAnalysis(products);
   renderRevenueTrends(products, prevProducts);
   renderAdvanced(ov);
+  renderDMTable(products);
 
   const now  = STATE.to   || new Date();
   const from = STATE.from || new Date(now - STATE.days * 86400000);
@@ -1343,6 +2141,23 @@ function refresh() {
     meta: { generated_at: new Date().toISOString(), range: { from, to: now }, days: STATE.days, compare: STATE.compareMode, property_id: GA4_CONFIG.propertyId },
     overview: ov, products, segments: segs, categories: cats,
   };
+}
+
+/* ================================================================
+   PDF DOWNLOAD
+================================================================ */
+function downloadPDF() {
+  // Update document title so the suggested filename is meaningful
+  const range = document.getElementById('db-range-label').textContent || 'report';
+  const prev  = document.title;
+  document.title = `Portfolio Report – ${range} – ${new Date().toISOString().split('T')[0]}`;
+
+  // Small delay so the title change is picked up by the print dialog
+  setTimeout(() => {
+    window.print();
+    // Restore title after the dialog closes (approximate)
+    setTimeout(() => { document.title = prev; }, 2000);
+  }, 80);
 }
 
 function run() {
