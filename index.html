@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Funnel Leak Finder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #F9FAFB;
+      color: #111827;
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #111827;
+    }
+    .header h1 span {
+      color: #ff4921;
+    }
+    .header p {
+      margin-top: 8px;
+      color: #6B7280;
+      font-size: 1rem;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+      padding: 28px 28px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h2 .icon { font-size: 1.15rem; }
+
+    /* Input grid */
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .input-grid .full { grid-column: 1 / -1; }
+
+    @media (max-width: 520px) {
+      .input-grid { grid-template-columns: 1fr; }
+      .input-grid .full { grid-column: 1; }
+    }
+
+    label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+    label .optional {
+      font-weight: 400;
+      color: #9CA3AF;
+      font-size: .75rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      font-size: .95rem;
+      color: #111827;
+      background: #F9FAFB;
+      transition: border-color .2s;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type="number"]:focus { border-color: #2d5648; background: #fff; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2d5648, #1a3d30);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: opacity .2s, transform .15s;
+      margin-top: 4px;
+    }
+    .btn:hover { opacity: .92; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    /* Results */
+    #results { display: none; }
+
+    /* Metrics row */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 420px) { .metrics-row { grid-template-columns: 1fr; } }
+
+    .metric-box {
+      border-radius: 10px;
+      padding: 18px 20px;
+      text-align: center;
+      position: relative;
+      cursor: help;
+    }
+    .metric-box .label {
+      font-size: .78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      opacity: .75;
+      margin-bottom: 6px;
+    }
+    .metric-box .value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .metric-box.green { background: #d5ede8; color: #2d5648; }
+    .metric-box.orange { background: #fff0ec; color: #cc3a1a; }
+    .metric-box.red { background: #ffe5de; color: #d63d15; }
+
+    /* Metric tooltip */
+    .metric-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 20;
+      pointer-events: none;
+      letter-spacing: .3px;
+    }
+    .metric-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #111827;
+    }
+    .metric-box:hover .metric-tooltip { display: block; }
+
+    /* What-if controls */
+    .whatif-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 420px) { .whatif-controls { grid-template-columns: 1fr; } }
+    .wi-ctrl label {
+      font-size: .78rem;
+      font-weight: 700;
+      color: #2d5648;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .wi-ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .wi-ctrl-row input[type="range"] {
+      flex: 1;
+      accent-color: #2d5648;
+      cursor: pointer;
+      height: 4px;
+    }
+    .wi-pct-badge {
+      min-width: 38px;
+      text-align: center;
+      font-size: .88rem;
+      font-weight: 800;
+      color: #2d5648;
+    }
+
+    /* Funnel */
+    .funnel-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .funnel-step {
+      position: relative;
+    }
+    .funnel-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .funnel-label {
+      min-width: 110px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    .funnel-bar-track {
+      flex: 1;
+      background: #F3F4F6;
+      border-radius: 99px;
+      height: 22px;
+      overflow: hidden;
+    }
+    .funnel-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .funnel-count {
+      min-width: 80px;
+      text-align: right;
+      font-size: .82rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .funnel-arrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 0 4px 122px;
+      font-size: .78rem;
+      color: #6B7280;
+    }
+    .funnel-arrow .drop-pct {
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: .75rem;
+    }
+    .drop-ok { background: #d5ede8; color: #2d5648; }
+    .drop-warn { background: #fff0ec; color: #cc3a1a; }
+    .drop-bad { background: #ffe5de; color: #d63d15; }
+
+    /* Bottleneck */
+    .bottleneck-banner {
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .bottleneck-banner .bicon { font-size: 1.4rem; line-height: 1; }
+    .bottleneck-banner .btext strong { display: block; font-size: .95rem; margin-bottom: 2px; }
+    .bottleneck-banner .btext span { font-size: .85rem; opacity: .85; }
+    .banner-green { background: #d5ede8; color: #2d5648; }
+    .banner-orange { background: #fff0ec; color: #a83010; }
+    .banner-red { background: #ffe5de; color: #99260d; }
+    .banner-blue { background: #EFF6FF; color: #1E40AF; }
+
+    /* Checklist */
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .9rem;
+      color: #374151;
+    }
+    .checklist li::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 6px;
+      background: #d5ede8;
+      border: 1.5px solid rgba(7,48,40,0.25);
+      margin-top: 1px;
+    }
+
+    /* Dropoff */
+    .dropoff-items { display: flex; flex-direction: column; gap: 12px; }
+    .dropoff-item {
+      background: #F9FAFB;
+      border-radius: 10px;
+      padding: 14px 16px;
+      border-left: 4px solid #E5E7EB;
+    }
+    .dropoff-item.warn { border-left-color: #ff4921; }
+    .dropoff-item.bad  { border-left-color: #ff4921; }
+    .dropoff-item.ok   { border-left-color: #2d5648; }
+    .dropoff-item .dpct {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .dropoff-item .dmsg { font-size: .83rem; color: #6B7280; }
+
+    /* Expected vs Actual */
+    .evsa-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 420px) { .evsa-grid { grid-template-columns: 1fr; } }
+
+    .evsa-box {
+      border-radius: 10px;
+      padding: 16px;
+      background: #F9FAFB;
+      border: 1.5px solid #E5E7EB;
+    }
+    .evsa-box .evsa-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #6B7280; margin-bottom: 8px; }
+    .evsa-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; }
+    .evsa-row .ev-name { color: #6B7280; }
+    .evsa-row .ev-val { font-weight: 700; }
+    .evsa-diff {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #E5E7EB;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .above { color: #2d5648; }
+    .below { color: #ff4921; }
+
+    /* Warning */
+    .warning-box {
+      background: #fff0ec;
+      border: 1.5px solid #ff4921;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .87rem;
+      color: #a83010;
+    }
+    .warning-box .wicon { font-size: 1.2rem; }
+
+    /* What-if */
+    .whatif-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 420px) { .whatif-grid { grid-template-columns: 1fr; } }
+
+    .whatif-box {
+      background: #eef8f5;
+      border: 1.5px solid rgba(7,48,40,0.25);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .whatif-box .wi-icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .whatif-box .wi-title { font-size: .78rem; font-weight: 700; color: #2d5648; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .whatif-box .wi-num { font-size: 1.5rem; font-weight: 800; color: #2d5648; }
+    .whatif-box .wi-sub { font-size: .78rem; color: rgba(7,48,40,0.55); margin-top: 2px; }
+    .whatif-box p { font-size: .82rem; color: #2d5648; margin-top: 6px; line-height: 1.4; }
+
+    /* Expected vs Actual — business interpretation */
+    .evsa-interp {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #E5E7EB;
+      font-size: .81rem;
+      line-height: 1.5;
+      color: #374151;
+    }
+    .evsa-interp .ei-gap {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .evsa-interp .ei-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .ei-excellent .ei-label { background: #d5ede8; color: #2d5648; }
+    .ei-good     .ei-label { background: #e0f2f1; color: #2d5648; }
+    .ei-neutral  .ei-label { background: #F3F4F6; color: #4B5563; }
+    .ei-warning  .ei-label { background: #fff0ec; color: #a83010; }
+    .ei-critical .ei-label { background: #ffe5de; color: #d63d15; }
+    .ei-excellent .ei-gap { color: #2d5648; }
+    .ei-good     .ei-gap { color: #2d5648; }
+    .ei-neutral  .ei-gap { color: #4B5563; }
+    .ei-warning  .ei-gap { color: #a83010; }
+    .ei-critical .ei-gap { color: #d63d15; }
+    .evsa-interp .ei-action {
+      font-size: .8rem;
+      color: #6B7280;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* Goal-Driven Simulator tabs */
+    .gds-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      background: #F3F4F6;
+      border-radius: 10px;
+      padding: 4px;
+    }
+    .gds-tab {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      border-radius: 7px;
+      background: transparent;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #6B7280;
+      font-family: Arial, sans-serif;
+      transition: background .2s, color .2s, box-shadow .2s;
+    }
+    .gds-tab-active {
+      background: #fff;
+      color: #2d5648;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+    .gds-panel { }
+    .gds-hint {
+      font-size: .84rem;
+      color: #6B7280;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .gds-growth-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .gds-growth-btn {
+      padding: 8px 16px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      background: #fff;
+      font-size: .88rem;
+      font-weight: 700;
+      color: #374151;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .gds-growth-btn:hover { border-color: #ff4921; color: #ff4921; }
+    .gds-growth-btn-active {
+      background: #ff4921;
+      border-color: #ff4921;
+      color: #fff !important;
+    }
+    .gds-conv-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #F9FAFB;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-size: .88rem;
+      color: #374151;
+    }
+    .gds-conv-summary .cs-val {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+    .gds-conv-summary .cs-cur { color: #6B7280; }
+    .gds-conv-summary .cs-arrow { color: #9CA3AF; font-size: 1.2rem; }
+    .gds-conv-summary .cs-target { color: #ff4921; }
+
+    /* Reverse calculator */
+    .rc-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .rc-input-row > div { flex: 1; }
+    .rc-input-row label {
+      font-size: .78rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+    .rc-input-row input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      font-size: .95rem;
+      color: #111827;
+      background: #F9FAFB;
+      outline: none;
+      -moz-appearance: textfield;
+      transition: border-color .2s;
+    }
+    .rc-input-row input[type="number"]:focus { border-color: #2d5648; background: #fff; }
+    .rc-input-row input[type="number"]::-webkit-outer-spin-button,
+    .rc-input-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .rc-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2d5648, #1a3d30);
+      color: #fff;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+      white-space: nowrap;
+    }
+    .rc-btn:hover { opacity: .88; }
+    .rc-result { display: none; }
+    .rc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 420px) { .rc-grid { grid-template-columns: 1fr; } }
+    .rc-box {
+      background: #F9FAFB;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .rc-box .rc-lbl { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6B7280; margin-bottom: 4px; }
+    .rc-box .rc-num { font-size: 1.4rem; font-weight: 800; color: #111827; }
+    .rc-box .rc-sub { font-size: .75rem; color: #9CA3AF; margin-top: 2px; }
+    .rc-verdict {
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+    .rc-verdict .rv-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+    .rc-verdict strong { display: block; margin-bottom: 2px; }
+    .rv-green  { background: #d5ede8; color: #2d5648; }
+    .rv-orange { background: #fff0ec; color: #a83010; }
+    .rv-red    { background: #ffe5de; color: #99260d; }
+
+    /* Final rec */
+    .final-rec {
+      background: linear-gradient(135deg, #2d5648, #1a3d30);
+      border-radius: 12px;
+      padding: 24px 28px;
+      color: #fff;
+      text-align: center;
+    }
+    .final-rec .fr-label {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      opacity: .8;
+      margin-bottom: 8px;
+    }
+    .final-rec .fr-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: .78rem;
+      color: #9CA3AF;
+    }
+
+    /* Animate in */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeUp .4s ease both; }
+    .animate-in:nth-child(2) { animation-delay: .05s; }
+    .animate-in:nth-child(3) { animation-delay: .10s; }
+    .animate-in:nth-child(4) { animation-delay: .15s; }
+    .animate-in:nth-child(5) { animation-delay: .20s; }
+    .animate-in:nth-child(6) { animation-delay: .25s; }
+    .animate-in:nth-child(7) { animation-delay: .30s; }
+    .animate-in:nth-child(8) { animation-delay: .35s; }
+    .animate-in:nth-child(9) { animation-delay: .40s; }
+    .animate-in:nth-child(10) { animation-delay: .45s; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Funnel <span>Leak</span> Finder</h1>
+    <p>Zjisti, kde tvoje PPC kampaně ztrácí výkon, a získej konkrétní tipy, jak ho zlepšit.</p>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card">
+    <h2><span class="icon">📥</span> Zadejte data</h2>
+    <div class="input-grid">
+      <div>
+        <label for="impressions">Impressions</label>
+        <input type="number" id="impressions" placeholder="e.g. 50000" min="0" />
+      </div>
+      <div>
+        <label for="clicks">Clicks</label>
+        <input type="number" id="clicks" placeholder="e.g. 1500" min="0" />
+      </div>
+      <div>
+        <label for="conversions">Conversions</label>
+        <input type="number" id="conversions" placeholder="e.g. 45" min="0" />
+      </div>
+      <div></div>
+      <div>
+        <label for="expectedCTR">Expected CTR (%) <span class="optional">optional</span></label>
+        <input type="number" id="expectedCTR" placeholder="e.g. 3.5" min="0" max="100" step="0.01" />
+      </div>
+      <div>
+        <label for="expectedCVR">Expected CVR (%) <span class="optional">optional</span></label>
+        <input type="number" id="expectedCVR" placeholder="e.g. 4.0" min="0" max="100" step="0.01" />
+      </div>
+      <div class="full">
+        <button class="btn" onclick="analyzeFunnel()">Analyze Funnel</button>
+      </div>
+    </div>
+    <div id="error-msg" style="display:none; margin-top:12px; color:#ff4921; font-size:.85rem; font-weight:600;"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- 8. Confidence Warning -->
+    <div id="section-warning" class="animate-in" style="display:none; margin-bottom:20px;">
+      <div class="warning-box">
+        <span class="wicon">⚠️</span>
+        <span><strong>Málo dat:</strong> bylo detekováno méně než 100 kliků — výsledky nemusí být statisticky spolehlivé.</span>
+      </div>
+    </div>
+
+    <!-- 1. Key Metrics -->
+    <div class="card animate-in">
+      <h2><span class="icon">📊</span> Klíčové metriky</h2>
+      <div class="metrics-row">
+        <div class="metric-box" id="ctr-box">
+          <div class="metric-tooltip">Horní část funnelu</div>
+          <div class="label">Míra prokliku</div>
+          <div class="value" id="ctr-val">—</div>
+        </div>
+        <div class="metric-box" id="cvr-box">
+          <div class="metric-tooltip">Dolní část funnelu</div>
+          <div class="label">Konverzní poměr</div>
+          <div class="value" id="cvr-val">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Funnel Visualization -->
+    <div class="card animate-in">
+      <h2><span class="icon">🔽</span> Vizualizace funnelu</h2>
+      <div class="funnel-steps">
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-label">Zobrazení</div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar-fill" id="bar-imp" style="width:100%; background:#2d5648;">100%</div>
+            </div>
+            <div class="funnel-count" id="count-imp">—</div>
+          </div>
+        </div>
+        <div class="funnel-arrow" id="arrow-ctr">
+          <span>↓</span>
+          <span id="drop-ctr-label">CTR: —%</span>
+          <span class="drop-pct" id="drop-ctr-badge">— odpad</span>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-label">Kliky</div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar-fill" id="bar-clicks" style="width:0%; background:#ff4921;"></div>
+            </div>
+            <div class="funnel-count" id="count-clicks">—</div>
+          </div>
+        </div>
+        <div class="funnel-arrow" id="arrow-cvr">
+          <span>↓</span>
+          <span id="drop-cvr-label">CVR: —%</span>
+          <span class="drop-pct" id="drop-cvr-badge">— odpad</span>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-label">Konverze</div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar-fill" id="bar-conv" style="width:0%; background:#ff4921;"></div>
+            </div>
+            <div class="funnel-count" id="count-conv">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Bottleneck -->
+    <div class="card animate-in">
+      <h2><span class="icon">🎯</span> Největší úzké místo</h2>
+      <div class="bottleneck-banner" id="bottleneck-banner">
+        <div class="bicon" id="bottleneck-icon"></div>
+        <div class="btext">
+          <strong id="bottleneck-title"></strong>
+          <span id="bottleneck-desc"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Kde je problém -->
+    <div class="card animate-in">
+      <h2><span class="icon">🚨</span> Kde je problém?</h2>
+      <div class="bottleneck-banner" id="problem-banner">
+        <div class="bicon" id="problem-icon"></div>
+        <div class="btext">
+          <strong id="problem-title"></strong>
+          <span id="problem-desc"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Diagnostics -->
+    <div class="card animate-in">
+      <h2><span class="icon">🔍</span> Diagnostika</h2>
+      <p id="diagnostics-text" style="font-size:.9rem; color:#374151; line-height:1.6;"></p>
+    </div>
+
+    <!-- 5. Recommendations -->
+    <div class="card animate-in">
+      <h2><span class="icon">✅</span> Doporučení</h2>
+      <ul class="checklist" id="recommendations-list"></ul>
+    </div>
+
+    <!-- 6. Drop-off Insights -->
+    <div class="card animate-in">
+      <h2><span class="icon">📉</span> Funnel Drop-off Analýza</h2>
+      <div class="dropoff-items">
+        <div class="dropoff-item" id="dropoff-click">
+          <div class="dpct" id="dropoff-click-pct">—</div>
+          <div class="dmsg" id="dropoff-click-msg"></div>
+        </div>
+        <div class="dropoff-item" id="dropoff-conv">
+          <div class="dpct" id="dropoff-conv-pct">—</div>
+          <div class="dmsg" id="dropoff-conv-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Expected vs Actual -->
+    <div id="section-evsa" class="card animate-in" style="display:none;">
+      <h2><span class="icon">📐</span> Očekávání vs. skutečnost</h2>
+      <div class="evsa-grid">
+        <div class="evsa-box" id="evsa-ctr" style="display:none;">
+          <div class="evsa-label">Porovnání CTR</div>
+          <div class="evsa-row"><span class="ev-name">Skutečné CTR</span><span class="ev-val" id="evsa-ctr-actual">—</span></div>
+          <div class="evsa-row"><span class="ev-name">Očekávané CTR</span><span class="ev-val" id="evsa-ctr-expected">—</span></div>
+          <div class="evsa-diff" id="evsa-ctr-diff"></div>
+          <div class="evsa-interp" id="evsa-ctr-interp"></div>
+        </div>
+        <div class="evsa-box" id="evsa-cvr" style="display:none;">
+          <div class="evsa-label">Porovnání CVR</div>
+          <div class="evsa-row"><span class="ev-name">Skutečné CVR</span><span class="ev-val" id="evsa-cvr-actual">—</span></div>
+          <div class="evsa-row"><span class="ev-name">Očekávané CVR</span><span class="ev-val" id="evsa-cvr-expected">—</span></div>
+          <div class="evsa-diff" id="evsa-cvr-diff"></div>
+          <div class="evsa-interp" id="evsa-cvr-interp"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. What-if Simulator -->
+    <div class="card animate-in">
+      <h2><span class="icon">🔮</span> Simulátor Co-kdyby</h2>
+      <div class="whatif-controls">
+        <div class="wi-ctrl">
+          <label>Zlepšení CTR</label>
+          <div class="wi-ctrl-row">
+            <input type="range" id="sim-ctr-pct" min="1" max="200" value="20" oninput="recalcSimulator()">
+            <span class="wi-pct-badge" id="sim-ctr-pct-val">+20%</span>
+          </div>
+        </div>
+        <div class="wi-ctrl">
+          <label>Zlepšení CVR</label>
+          <div class="wi-ctrl-row">
+            <input type="range" id="sim-cvr-pct" min="1" max="200" value="20" oninput="recalcSimulator()">
+            <span class="wi-pct-badge" id="sim-cvr-pct-val">+20%</span>
+          </div>
+        </div>
+      </div>
+      <div class="whatif-grid">
+        <div class="whatif-box">
+          <div class="wi-icon">🖱️</div>
+          <div class="wi-title" id="whatif-ctr-title">+20% CTR</div>
+          <div class="wi-num" id="whatif-clicks">—</div>
+          <div class="wi-sub">celkem kliků</div>
+          <p id="whatif-clicks-msg"></p>
+        </div>
+        <div class="whatif-box">
+          <div class="wi-icon">🏆</div>
+          <div class="wi-title" id="whatif-cvr-title">+20% CVR</div>
+          <div class="wi-num" id="whatif-convs">—</div>
+          <div class="wi-sub">celkem konverzí</div>
+          <p id="whatif-convs-msg"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Goal-Driven Simulátor -->
+    <div class="card animate-in">
+      <h2><span class="icon">🎯</span> Goal-Driven Simulátor</h2>
+      <p style="font-size:.85rem; color:#6B7280; margin-bottom:18px; line-height:1.5;">Nastavte svůj obchodní cíl a zjistěte, co je potřeba ke splnění — nebo kolik konverzí lze očekávat při škálování kampaní.</p>
+      <div class="gds-tabs">
+        <button class="gds-tab gds-tab-active" onclick="switchGdsTab('conv', this)">🏆 Chci X konverzí</button>
+        <button class="gds-tab" onclick="switchGdsTab('scale', this)">📈 Plánuji škálovat</button>
+      </div>
+
+      <!-- Panel 1: Cílový nárůst konverzí -->
+      <div id="gds-panel-conv" class="gds-panel">
+        <p class="gds-hint">Vyberte nebo zadejte cílový nárůst konverzí. Simulátor spočítá, jaké CTR a počet kliků by bylo potřeba při stávajícím konverzním poměru a zobrazení.</p>
+        <div class="gds-growth-btns">
+          <button class="gds-growth-btn" onclick="setGrowth(10, this)">+10%</button>
+          <button class="gds-growth-btn" onclick="setGrowth(25, this)">+25%</button>
+          <button class="gds-growth-btn" onclick="setGrowth(50, this)">+50%</button>
+          <button class="gds-growth-btn" onclick="setGrowth(100, this)">+100%</button>
+          <button class="gds-growth-btn" onclick="setGrowth(200, this)">+200%</button>
+        </div>
+        <div class="wi-ctrl" style="margin-bottom:18px;">
+          <label style="font-size:.78rem;font-weight:700;color:#2d5648;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block;">Vlastní nárůst</label>
+          <div class="wi-ctrl-row">
+            <input type="range" id="gds-conv-input" min="1" max="300" value="50" oninput="onGrowthSlider()">
+            <span class="wi-pct-badge" id="gds-conv-input-val">+50%</span>
+          </div>
+        </div>
+        <div class="rc-result" id="gds-conv-result">
+          <div class="gds-conv-summary">
+            <div class="cs-cur"><div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;opacity:.7">Aktuální konverze</div><div class="cs-val" id="gds-c-cur-conv">—</div></div>
+            <div class="cs-arrow">→</div>
+            <div class="cs-target"><div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;opacity:.8">Cílové konverze</div><div class="cs-val" id="gds-c-target-conv">—</div></div>
+          </div>
+          <div class="rc-grid">
+            <div class="rc-box">
+              <div class="rc-lbl">Aktuální CTR</div>
+              <div class="rc-num" id="gds-c-cur-ctr">—</div>
+              <div class="rc-sub">skutečné</div>
+            </div>
+            <div class="rc-box">
+              <div class="rc-lbl">Potřebné CTR</div>
+              <div class="rc-num" id="gds-c-need-ctr">—</div>
+              <div class="rc-sub">pro dosažení cíle</div>
+            </div>
+            <div class="rc-box">
+              <div class="rc-lbl">Potřebné kliky</div>
+              <div class="rc-num" id="gds-c-need-clicks">—</div>
+              <div class="rc-sub">z <span id="gds-c-imp-ref">—</span> zobrazení</div>
+            </div>
+            <div class="rc-box">
+              <div class="rc-lbl">Rozdíl CTR</div>
+              <div class="rc-num" id="gds-c-gap">—</div>
+              <div class="rc-sub">oproti aktuálnímu</div>
+            </div>
+          </div>
+          <div class="rc-verdict" id="gds-c-verdict">
+            <span class="rv-icon" id="gds-c-verdict-icon"></span>
+            <div>
+              <strong id="gds-c-verdict-title"></strong>
+              <span id="gds-c-verdict-desc"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Škálování -->
+      <div id="gds-panel-scale" class="gds-panel" style="display:none;">
+        <p class="gds-hint">Zadejte cílový počet zobrazení a simulátor ukáže, kolik kliků a konverzí lze očekávat při stávajícím CTR a konverzním poměru.</p>
+        <div class="rc-input-row">
+          <div>
+            <label for="gds-scale-input">Cílový počet zobrazení</label>
+            <input type="number" id="gds-scale-input" placeholder="např. 200000" min="0" />
+          </div>
+          <button class="rc-btn" onclick="calcGoalScale()">Spočítat</button>
+        </div>
+        <div class="rc-result" id="gds-scale-result">
+          <div class="rc-grid">
+            <div class="rc-box">
+              <div class="rc-lbl">Očekávané kliky</div>
+              <div class="rc-num" id="gds-s-clicks">—</div>
+              <div class="rc-sub">při CTR <span id="gds-s-ctr-ref">—</span></div>
+            </div>
+            <div class="rc-box">
+              <div class="rc-lbl">Očekávané konverze</div>
+              <div class="rc-num" id="gds-s-convs">—</div>
+              <div class="rc-sub">při CVR <span id="gds-s-cvr-ref">—</span></div>
+            </div>
+            <div class="rc-box">
+              <div class="rc-lbl">Nárůst konverzí</div>
+              <div class="rc-num" id="gds-s-conv-growth">—</div>
+              <div class="rc-sub">oproti aktuálnímu stavu</div>
+            </div>
+            <div class="rc-box">
+              <div class="rc-lbl">Škálovací faktor</div>
+              <div class="rc-num" id="gds-s-factor">—</div>
+              <div class="rc-sub">nárůst zobrazení</div>
+            </div>
+          </div>
+          <div class="rc-verdict" id="gds-s-verdict">
+            <span class="rv-icon" id="gds-s-verdict-icon"></span>
+            <div>
+              <strong id="gds-s-verdict-title"></strong>
+              <span id="gds-s-verdict-desc"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Final Recommendation -->
+    <div class="final-rec animate-in" id="final-rec-box">
+      <div class="fr-label">Doporučený další krok</div>
+      <div class="fr-text" id="final-rec-text"></div>
+    </div>
+
+  </div><!-- /results -->
+
+  <footer>Vytvořeno s láskou k Maira teamu by Miri</footer>
+
+</div><!-- /container -->
+
+<script>
+  let _imp = 0, _clk = 0, _conv = 0, _ctr = 0, _cvr = 0;
+
+  function fmt(n) { return n.toLocaleString(); }
+  function pct(n, decimals = 2) { return n.toFixed(decimals) + '%'; }
+  function diff(actual, expected) { return ((actual - expected) / expected * 100).toFixed(1); }
+
+  function evsaInterpretation(gapPct, type) {
+    const g = parseFloat(gapPct);
+    let cls, badge, title, action;
+    if (type === 'ctr') {
+      if (g >= 30) {
+        cls = 'ei-excellent'; badge = 'Výrazně nad očekáváním';
+        title = 'Reklamy jsou velmi relevantní a výrazně překračují benchmark.';
+        action = 'Doporučení: Navyš rozpočet a využijte tento výkon k maximálnímu škálování.';
+      } else if (g >= 10) {
+        cls = 'ei-good'; badge = 'Nad očekáváním';
+        title = 'CTR je solidně nad plánem — reklamy zaujímají cílové publikum.';
+        action = 'Doporučení: Škáluj postupně, sleduj frekvenci zobrazení.';
+      } else if (g >= -10) {
+        cls = 'ei-neutral'; badge = 'V normě';
+        title = 'CTR odpovídá očekávání — reklamy jsou standardně výkonné.';
+        action = 'Doporučení: Udržuj stávající nastavení, testuj menší varianty.';
+      } else if (g >= -30) {
+        cls = 'ei-warning'; badge = 'Pod očekáváním';
+        title = 'CTR zaostává za plánem — reklamy nezaujímají dostatečně.';
+        action = 'Doporučení: Obměň kreativy, otestujte nové nadpisy nebo upravte cílení.';
+      } else {
+        cls = 'ei-critical'; badge = 'Kriticky pod očekáváním';
+        title = 'CTR výrazně zaostává — reklamy nebo cílení zásadně neodpovídají publiku.';
+        action = 'Doporučení: Prioritní akce — přepracujte celou reklamní sestavu.';
+      }
+    } else {
+      if (g >= 30) {
+        cls = 'ei-excellent'; badge = 'Výrazně nad očekáváním';
+        title = 'Landing page performuje nadprůměrně — konverzní tok je velmi efektivní.';
+        action = 'Doporučení: Škáluj provoz na tuto stránku, replikuj úspěšné prvky.';
+      } else if (g >= 10) {
+        cls = 'ei-good'; badge = 'Nad očekáváním';
+        title = 'Konverzní poměr překračuje plán — landing page dobře konvertuje.';
+        action = 'Doporučení: Navyš provoz, landing page je připravena na větší zátěž.';
+      } else if (g >= -10) {
+        cls = 'ei-neutral'; badge = 'V normě';
+        title = 'Konverzní poměr odpovídá plánu — landing page je standardně výkonná.';
+        action = 'Doporučení: Udržuj stávající nastavení, sleduj sezónní výkyvy.';
+      } else if (g >= -30) {
+        cls = 'ei-warning'; badge = 'Pod očekáváním';
+        title = 'Landing page zaostává — UX nebo nabídka brzdí konverze.';
+        action = 'Doporučení: A/B testujte landing page, vylepšete CTA a prvky důvěry.';
+      } else {
+        cls = 'ei-critical'; badge = 'Kriticky pod očekáváním';
+        title = 'Kritický problém na landing page — výrazně neplní svůj účel.';
+        action = 'Doporučení: Okamžitá optimalizace — přepracujte UX, nabídku i konverzní tok.';
+      }
+    }
+    return `<div class="${cls}">
+      <div class="ei-gap">${g >= 0 ? '+' : ''}${g}%</div>
+      <span class="ei-label">${badge}</span>
+      <div>${title}</div>
+      <div class="ei-action">${action}</div>
+    </div>`;
+  }
+
+  function switchGdsTab(tab, btn) {
+    document.getElementById('gds-panel-conv').style.display  = tab === 'conv'  ? 'block' : 'none';
+    document.getElementById('gds-panel-scale').style.display = tab === 'scale' ? 'block' : 'none';
+    document.querySelectorAll('.gds-tab').forEach(b => b.classList.remove('gds-tab-active'));
+    btn.classList.add('gds-tab-active');
+  }
+
+  function setGrowth(pct, btn) {
+    const slider = document.getElementById('gds-conv-input');
+    slider.value = pct;
+    document.getElementById('gds-conv-input-val').textContent = '+' + pct + '%';
+    document.querySelectorAll('.gds-growth-btn').forEach(b => b.classList.remove('gds-growth-btn-active'));
+    btn.classList.add('gds-growth-btn-active');
+    calcGoalConv();
+  }
+
+  function onGrowthSlider() {
+    const val = parseInt(document.getElementById('gds-conv-input').value);
+    document.getElementById('gds-conv-input-val').textContent = '+' + val + '%';
+    document.querySelectorAll('.gds-growth-btn').forEach(b => b.classList.remove('gds-growth-btn-active'));
+    document.querySelectorAll('.gds-growth-btn').forEach(b => {
+      if (parseInt(b.textContent.replace('+','').replace('%','')) === val) b.classList.add('gds-growth-btn-active');
+    });
+    calcGoalConv();
+  }
+
+  function calcGoalConv() {
+    if (!_imp || !_cvr || !_conv) return;
+    const growthPct = parseFloat(document.getElementById('gds-conv-input').value);
+    if (isNaN(growthPct) || growthPct <= 0) return;
+
+    const targetConv   = _conv * (1 + growthPct / 100);
+    const neededClicks = targetConv / (_cvr / 100);
+    const neededCTR    = (neededClicks / _imp) * 100;
+    const gapCTR       = neededCTR - _ctr;
+    const gapPct       = _ctr > 0 ? ((neededCTR - _ctr) / _ctr * 100) : 999;
+
+    document.getElementById('gds-c-cur-conv').textContent    = fmt(Math.round(_conv));
+    document.getElementById('gds-c-target-conv').textContent = fmt(Math.round(targetConv)) + ' (+' + growthPct + '%)';
+    document.getElementById('gds-c-cur-ctr').textContent     = _ctr.toFixed(2) + '%';
+    document.getElementById('gds-c-need-ctr').textContent    = neededCTR.toFixed(2) + '%';
+    document.getElementById('gds-c-need-clicks').textContent = fmt(Math.round(neededClicks));
+    document.getElementById('gds-c-imp-ref').textContent     = fmt(Math.round(_imp));
+    document.getElementById('gds-c-gap').textContent         = (gapCTR >= 0 ? '+' : '') + gapCTR.toFixed(2) + '%';
+
+    const verdict = document.getElementById('gds-c-verdict');
+    const vIcon   = document.getElementById('gds-c-verdict-icon');
+    const vTitle  = document.getElementById('gds-c-verdict-title');
+    const vDesc   = document.getElementById('gds-c-verdict-desc');
+
+    if (neededCTR <= _ctr * 1.05) {
+      verdict.className = 'rc-verdict rv-green'; vIcon.textContent = '✅';
+      vTitle.textContent = 'Reálné — v dosahu aktuálního výkonu';
+      vDesc.textContent  = 'Cíl je dosažitelný prakticky bez změny CTR. Zaměř se na udržení stávajícího výkonu.';
+    } else if (neededCTR <= _ctr * 1.3) {
+      verdict.className = 'rc-verdict rv-green'; vIcon.textContent = '📈';
+      vTitle.textContent = 'Dosažitelné — vyžaduje mírné zlepšení CTR';
+      vDesc.textContent  = 'Cíl je realistický. Otestuj nové kreativy nebo upravte cílení pro zvýšení CTR o ~' + Math.round(gapPct) + ' %.';
+    } else if (neededCTR <= 10) {
+      verdict.className = 'rc-verdict rv-orange'; vIcon.textContent = '⚠️';
+      vTitle.textContent = 'Náročné — vyžaduje výrazné zlepšení CTR';
+      vDesc.textContent  = 'Potřebné CTR (' + neededCTR.toFixed(2) + ' %) je technicky dosažitelné, ale vyžaduje zásadní práci na kreativách a cílení. Zvaž také zlepšení CVR.';
+    } else if (neededCTR <= 25) {
+      verdict.className = 'rc-verdict rv-orange'; vIcon.textContent = '⚠️';
+      vTitle.textContent = 'Velmi náročné — přehodnoťte cíl nebo zlepšete CVR';
+      vDesc.textContent  = 'Potřebné CTR (' + neededCTR.toFixed(2) + ' %) je pro většinu PPC kanálů těžko dosažitelné. Sniž cíl nebo pracujte na zvýšení CVR.';
+    } else {
+      verdict.className = 'rc-verdict rv-red'; vIcon.textContent = '🚫';
+      vTitle.textContent = 'Nereálné — cíl nelze splnit samotným CTR';
+      vDesc.textContent  = 'Potřebné CTR (' + neededCTR.toFixed(2) + ' %) je prakticky nedosažitelné. Přehodnoť cíl nebo výrazně zlepšete konverzní poměr na landing page.';
+    }
+    document.getElementById('gds-conv-result').style.display = 'block';
+  }
+
+  function calcGoalScale() {
+    if (!_imp) return;
+    const targetImp = parseFloat(document.getElementById('gds-scale-input').value);
+    if (isNaN(targetImp) || targetImp <= 0) return;
+
+    const expClicks  = Math.round(targetImp * (_ctr / 100));
+    const expConvs   = Math.round(expClicks * (_cvr / 100));
+    const addConvs   = expConvs - _conv;
+    const factor     = targetImp / _imp;
+
+    document.getElementById('gds-s-clicks').textContent      = fmt(expClicks);
+    document.getElementById('gds-s-convs').textContent       = fmt(expConvs);
+    document.getElementById('gds-s-ctr-ref').textContent     = _ctr.toFixed(2) + '%';
+    document.getElementById('gds-s-cvr-ref').textContent     = _cvr.toFixed(2) + '%';
+    document.getElementById('gds-s-conv-growth').textContent = (addConvs >= 0 ? '+' : '') + fmt(addConvs);
+    document.getElementById('gds-s-factor').textContent      = factor.toFixed(1) + 'x';
+
+    const verdict = document.getElementById('gds-s-verdict');
+    const vIcon   = document.getElementById('gds-s-verdict-icon');
+    const vTitle  = document.getElementById('gds-s-verdict-title');
+    const vDesc   = document.getElementById('gds-s-verdict-desc');
+
+    if (factor < 1) {
+      verdict.className = 'rc-verdict rv-orange'; vIcon.textContent = '⚠️';
+      vTitle.textContent = 'Snížení rozsahu kampaně';
+      vDesc.textContent  = 'Cílový počet zobrazení je nižší než aktuální. Očekávejte proporcionální pokles kliků i konverzí.';
+    } else if (factor <= 1.5) {
+      verdict.className = 'rc-verdict rv-green'; vIcon.textContent = '📈';
+      vTitle.textContent = 'Konzervativní škálování — bezpečný první krok';
+      vDesc.textContent  = 'Nárůst o ' + ((factor - 1) * 100).toFixed(0) + ' % je bezpečný. Monitoruj CTR a CVR — při vyšším objemu mohou mírně klesat.';
+    } else if (factor <= 3) {
+      verdict.className = 'rc-verdict rv-green'; vIcon.textContent = '🚀';
+      vTitle.textContent = 'Agresivní škálování — sleduj kvalitu publika';
+      vDesc.textContent  = 'Nárůst o ' + ((factor - 1) * 100).toFixed(0) + ' % je ambiciózní. Výsledky předpokládají stávající CTR a CVR — škálujte postupně a testujte nová publika.';
+    } else {
+      verdict.className = 'rc-verdict rv-orange'; vIcon.textContent = '⚠️';
+      vTitle.textContent = 'Velmi agresivní škálování — vysoké riziko poklesu výkonnosti';
+      vDesc.textContent  = 'Škálování ' + factor.toFixed(1) + 'x předpokládá stabilní metriky, což je při takovém objemu nepravděpodobné. Plánuj postupně a počítej s poklesem CTR i CVR.';
+    }
+    document.getElementById('gds-scale-result').style.display = 'block';
+  }
+
+  function recalcSimulator() {
+    if (!_imp) return;
+    const ctrPct = parseInt(document.getElementById('sim-ctr-pct').value);
+    const cvrPct = parseInt(document.getElementById('sim-cvr-pct').value);
+    document.getElementById('sim-ctr-pct-val').textContent = '+' + ctrPct + '%';
+    document.getElementById('sim-cvr-pct-val').textContent = '+' + cvrPct + '%';
+    document.getElementById('whatif-ctr-title').textContent = '+' + ctrPct + '% CTR';
+    document.getElementById('whatif-cvr-title').textContent = '+' + cvrPct + '% CVR';
+
+    const newClicks = Math.round(_imp * (_ctr * (1 + ctrPct / 100) / 100));
+    const addClicks = newClicks - _clk;
+    const newConvs  = Math.round(_clk * (_cvr * (1 + cvrPct / 100) / 100));
+    const addConvs  = newConvs - _conv;
+
+    document.getElementById('whatif-clicks').textContent = fmt(newClicks);
+    document.getElementById('whatif-clicks-msg').textContent =
+      'Pokud se CTR zlepší o ' + ctrPct + ' %, získáte o ' + fmt(Math.max(addClicks, 0)) + ' kliků více.';
+    document.getElementById('whatif-convs').textContent = fmt(newConvs);
+    document.getElementById('whatif-convs-msg').textContent =
+      'Pokud se CVR zlepší o ' + cvrPct + ' %, získáte o ' + fmt(Math.max(addConvs, 0)) + ' konverzí více.';
+  }
+
+  function analyzeFunnel() {
+    const errEl = document.getElementById('error-msg');
+    errEl.style.display = 'none';
+
+    const imp    = parseFloat(document.getElementById('impressions').value);
+    const clk    = parseFloat(document.getElementById('clicks').value);
+    const conv   = parseFloat(document.getElementById('conversions').value);
+    const expCTR = parseFloat(document.getElementById('expectedCTR').value);
+    const expCVR = parseFloat(document.getElementById('expectedCVR').value);
+
+    if (!imp || imp <= 0 || !clk || clk < 0 || isNaN(conv) || conv < 0) {
+      errEl.textContent = 'Zadejte platné hodnoty Zobrazení, Kliků a Konverzí (vše musí být ≥ 0, Zobrazení > 0).';
+      errEl.style.display = 'block'; return;
+    }
+    if (clk > imp) { errEl.textContent = 'Kliky nemohou přesáhnout Zobrazení.'; errEl.style.display = 'block'; return; }
+    if (conv > clk) { errEl.textContent = 'Konverze nemohou přesáhnout Kliky.'; errEl.style.display = 'block'; return; }
+
+    const ctr = (clk / imp) * 100;
+    const cvr = clk > 0 ? (conv / clk) * 100 : 0;
+    _imp = imp; _clk = clk; _conv = conv; _ctr = ctr; _cvr = cvr;
+    const dropCTR = 100 - ctr;
+    const dropCVR = 100 - cvr;
+    const lowCTR = ctr < 1;
+    const lowCVR = cvr < 2;
+
+    document.getElementById('section-warning').style.display = clk < 100 ? 'block' : 'none';
+
+    document.getElementById('ctr-val').textContent = pct(ctr);
+    document.getElementById('cvr-val').textContent = pct(cvr);
+    document.getElementById('ctr-box').className = 'metric-box ' + (lowCTR ? 'red' : ctr < 2 ? 'orange' : 'green');
+    document.getElementById('cvr-box').className = 'metric-box ' + (lowCVR ? 'red' : cvr < 4 ? 'orange' : 'green');
+
+    document.getElementById('count-imp').textContent    = fmt(imp);
+    document.getElementById('count-clicks').textContent = fmt(clk);
+    document.getElementById('count-conv').textContent   = fmt(conv);
+
+    const clickBarPct = Math.min((clk / imp) * 100, 100);
+    const convBarPct  = clk > 0 ? Math.min((conv / imp) * 100, 100) : 0;
+    const clickColor  = lowCTR ? '#ff4921' : ctr < 2 ? '#ff4921' : '#2d5648';
+    const convColor   = lowCVR ? '#ff4921' : cvr < 4  ? '#ff4921' : '#2d5648';
+
+    setTimeout(() => {
+      const barClicks = document.getElementById('bar-clicks');
+      barClicks.style.width = clickBarPct + '%';
+      barClicks.style.background = clickColor;
+      barClicks.textContent = pct(ctr, 1);
+      const barConv = document.getElementById('bar-conv');
+      barConv.style.width = Math.max(convBarPct, 0.5) + '%';
+      barConv.style.background = convColor;
+      barConv.textContent = imp > 0 ? pct((conv / imp) * 100, 1) : '0%';
+    }, 80);
+
+    document.getElementById('drop-ctr-label').textContent = 'CTR: ' + pct(ctr, 2);
+    document.getElementById('drop-cvr-label').textContent = 'CVR: ' + pct(cvr, 2);
+
+    const ctrBadge = document.getElementById('drop-ctr-badge');
+    ctrBadge.textContent = pct(dropCTR, 1) + ' drop-off';
+    ctrBadge.className = 'drop-pct ' + (dropCTR > 99 ? 'drop-bad' : dropCTR > 97 ? 'drop-warn' : 'drop-ok');
+
+    const cvrBadge = document.getElementById('drop-cvr-badge');
+    cvrBadge.textContent = pct(dropCVR, 1) + ' drop-off';
+    cvrBadge.className = 'drop-pct ' + (dropCVR > 98 ? 'drop-bad' : dropCVR > 95 ? 'drop-warn' : 'drop-ok');
+
+    const bb = document.getElementById('bottleneck-banner');
+    if (lowCTR && lowCVR) {
+      bb.className = 'bottleneck-banner banner-red';
+      document.getElementById('bottleneck-icon').textContent = '🚨';
+      document.getElementById('bottleneck-title').textContent = 'Závažné problémy napříč celým funnelem';
+      document.getElementById('bottleneck-desc').textContent = 'CTR i CVR jsou kriticky nízké — tvůj funnel ztrácí uživatele na každém kroku.';
+    } else if (lowCTR) {
+      bb.className = 'bottleneck-banner banner-orange';
+      document.getElementById('bottleneck-icon').textContent = '⚠️';
+      document.getElementById('bottleneck-title').textContent = 'Největší problém: Nízké CTR (problém na vrcholu funnelu)';
+      document.getElementById('bottleneck-desc').textContent = 'Tvoje reklamy nebo cílení nejsou dostatečně přesvědčivé, aby přilákaly kliky.';
+    } else if (lowCVR) {
+      bb.className = 'bottleneck-banner banner-orange';
+      document.getElementById('bottleneck-icon').textContent = '⚠️';
+      document.getElementById('bottleneck-title').textContent = 'Největší problém: Nízká míra konverze (problém na dně funnelu)';
+      document.getElementById('bottleneck-desc').textContent = 'Uživatelé klikají, ale nekonvertují — tvoje landing page nebo nabídka potřebuje zlepšení.';
+    } else {
+      bb.className = 'bottleneck-banner banner-green';
+      document.getElementById('bottleneck-icon').textContent = '✅';
+      document.getElementById('bottleneck-title').textContent = 'Funnel funguje dobře';
+      document.getElementById('bottleneck-desc').textContent = 'CTR i CVR jsou nad benchmarkem. Zaměř se na škálování toho, co funguje.';
+    }
+
+    const distIssue = imp < 1000;
+    const pb = document.getElementById('problem-banner');
+    if (distIssue) {
+      pb.className = 'bottleneck-banner banner-blue';
+      document.getElementById('problem-icon').textContent = '📢';
+      document.getElementById('problem-title').textContent = 'Problém s distribucí';
+      document.getElementById('problem-desc').textContent = 'Tvoje reklamy neoslovují dostatek lidí. Zvyš rozpočet nebo rozšiř cílení.';
+    } else if (lowCTR) {
+      pb.className = 'bottleneck-banner banner-red';
+      document.getElementById('problem-icon').textContent = '🎨';
+      document.getElementById('problem-title').textContent = 'Problém s reklamou / kreativou';
+      document.getElementById('problem-desc').textContent = 'Uživatelé na tvoje reklamy neklikají. Vylepši kreativy, sdělení nebo cílení.';
+    } else if (lowCVR) {
+      pb.className = 'bottleneck-banner banner-orange';
+      document.getElementById('problem-icon').textContent = '🌐';
+      document.getElementById('problem-title').textContent = 'Problém s webem / landing page';
+      document.getElementById('problem-desc').textContent = 'Uživatelé klikají, ale nekonvertují. Optimalizuj UX, nabídku nebo prvky důvěry.';
+    } else {
+      pb.className = 'bottleneck-banner banner-green';
+      document.getElementById('problem-icon').textContent = '✅';
+      document.getElementById('problem-title').textContent = 'Žádné závažné problémy';
+      document.getElementById('problem-desc').textContent = 'Tvůj funnel funguje dobře a je připraven ke škálování.';
+    }
+
+    let diagParts = [];
+    if (lowCTR) diagParts.push('🔴 <strong>Nízké CTR:</strong> Tvoje reklamy nebo cílení nezaujímají uživatele.');
+    if (lowCVR) diagParts.push('🟠 <strong>Nízké CVR:</strong> Tvoje landing page nebo nabídka nevýkonná.');
+    if (!lowCTR && !lowCVR) diagParts.push('🟢 <strong>Zdravý funnel:</strong> Tvůj funnel funguje dobře a je připraven ke škálování.');
+    document.getElementById('diagnostics-text').innerHTML = diagParts.join('<br><br>');
+
+    const recList = document.getElementById('recommendations-list');
+    recList.innerHTML = '';
+    let recs = [];
+    if (distIssue) {
+      recs.push('Zvyš rozpočet kampaně pro větší dosah zobrazení');
+      recs.push('Rozšiř cílení na publikum — věk, zájmy, lokality nebo lookalike segmenty');
+    } else if (lowCTR) {
+      recs.push('Otestuj nové kreativy (obrázky / videa) pro lepší zapojení uživatelů');
+      recs.push('Vylepši nadpisy a texty reklam pro větší relevanci');
+      recs.push('Uprav cílení na publikum, abys oslovil/a kvalifikovanější uživatele');
+    } else if (lowCVR) {
+      recs.push('Vylepši UX landing page — rychlost, rozložení a mobilní zkušenost');
+      recs.push('Přidej prvky důvěry: recenze, záruky, certifikace, reference');
+      recs.push('Zjednoduš konverzní tok — omezte počet polí formuláře a tření');
+    } else {
+      recs.push('Postupně zvyšuj rozpočet pro škálování úspěšných kampaní');
+      recs.push('Duplikuj nejúspěšnější reklamní sestavy na nová publika');
+      recs.push('Zdokumentuj, co funguje, a aplikuj to na nové kampaně');
+    }
+    recs.forEach(r => { const li = document.createElement('li'); li.textContent = r; recList.appendChild(li); });
+
+    const doClickEl = document.getElementById('dropoff-click');
+    document.getElementById('dropoff-click-pct').textContent = pct(dropCTR, 1) + ' uživatelů odpadne před kliknutím';
+    document.getElementById('dropoff-click-msg').textContent = lowCTR
+      ? 'Kritické: naprostá většina uživatelů se nikdy nezapojí do tvojí reklamy → zaměřte se na kreativy a cílení.'
+      : dropCTR > 97 ? 'Většina uživatelů nekliká — je prostor pro zlepšení atraktivity reklamy.'
+      : 'Odpad před kliknutím je v přijatelném rozsahu.';
+    doClickEl.className = 'dropoff-item ' + (lowCTR ? 'bad' : dropCTR > 97 ? 'warn' : 'ok');
+
+    const doConvEl = document.getElementById('dropoff-conv');
+    document.getElementById('dropoff-conv-pct').textContent = pct(dropCVR, 1) + ' uživatelů odpadne před konverzí';
+    document.getElementById('dropoff-conv-msg').textContent = lowCVR
+      ? 'Kritické: většina návštěvníků odchází bez konverze → optimalizujte landing page a nabídku.'
+      : dropCVR > 95 ? 'Odpad před konverzí je vysoký — zvažte A/B testování landing page.'
+      : 'Odpad před konverzí je v zdravém rozsahu.';
+    doConvEl.className = 'dropoff-item ' + (lowCVR ? 'bad' : dropCVR > 95 ? 'warn' : 'ok');
+
+    const hasCTRexp = !isNaN(expCTR) && expCTR > 0;
+    const hasCVRexp = !isNaN(expCVR) && expCVR > 0;
+    const evsaSection = document.getElementById('section-evsa');
+    if (hasCTRexp || hasCVRexp) {
+      evsaSection.style.display = 'block';
+      if (hasCTRexp) {
+        document.getElementById('evsa-ctr').style.display = 'block';
+        document.getElementById('evsa-ctr-actual').textContent   = pct(ctr);
+        document.getElementById('evsa-ctr-expected').textContent = pct(expCTR);
+        const ctrDiff = parseFloat(diff(ctr, expCTR));
+        document.getElementById('evsa-ctr-diff').innerHTML = ctrDiff >= 0
+          ? '<span class="above">▲ CTR je o ' + Math.abs(ctrDiff) + '% nad očekáváním</span>'
+          : '<span class="below">▼ CTR je o ' + Math.abs(ctrDiff) + '% pod očekáváním</span>';
+        document.getElementById('evsa-ctr-interp').innerHTML = evsaInterpretation(ctrDiff, 'ctr');
+      } else { document.getElementById('evsa-ctr').style.display = 'none'; }
+      if (hasCVRexp) {
+        document.getElementById('evsa-cvr').style.display = 'block';
+        document.getElementById('evsa-cvr-actual').textContent   = pct(cvr);
+        document.getElementById('evsa-cvr-expected').textContent = pct(expCVR);
+        const cvrDiff = parseFloat(diff(cvr, expCVR));
+        document.getElementById('evsa-cvr-diff').innerHTML = cvrDiff >= 0
+          ? '<span class="above">▲ CVR je o ' + Math.abs(cvrDiff) + '% nad očekáváním</span>'
+          : '<span class="below">▼ CVR je o ' + Math.abs(cvrDiff) + '% pod očekáváním</span>';
+        document.getElementById('evsa-cvr-interp').innerHTML = evsaInterpretation(cvrDiff, 'cvr');
+      } else { document.getElementById('evsa-cvr').style.display = 'none'; }
+    } else { evsaSection.style.display = 'none'; }
+
+    recalcSimulator();
+
+    let finalRec = '';
+    if (distIssue)          finalRec = 'Zvyš dosah — navyš rozpočet nebo rozšiř cílení na publikum.';
+    else if (lowCTR && lowCVR) finalRec = 'Začněte s kreativami a cílením — poté opravte landing page, jakmile bude CTR zdravé.';
+    else if (lowCTR)        finalRec = 'Zaměř se na zlepšení reklamních kreativ, nadpisů a cílení na publikum.';
+    else if (lowCVR)        finalRec = 'Optimalizuj landing page — vylepši UX, přidej prvky důvěry a zjednoduš formulář.';
+    else                    finalRec = 'Škáluj kampaně — zvyšte rozpočet a duplikujte nejúspěšnější reklamní sestavy.';
+    document.getElementById('final-rec-text').textContent = finalRec;
+
+    const resultsEl = document.getElementById('results');
+    resultsEl.style.display = 'block';
+    setTimeout(() => { resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+  }
+
+  document.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') analyzeFunnel(); });
+  });
+</script>
+
+</body>
+</html>
